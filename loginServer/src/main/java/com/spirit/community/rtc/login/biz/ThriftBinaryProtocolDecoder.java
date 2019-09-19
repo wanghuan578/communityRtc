@@ -13,6 +13,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.spirit.community.rtc.login.protocol.rpc.thrift.CommonMessageType.MT_HELLO_REQ;
+
 
 @Slf4j
 public class ThriftBinaryProtocolDecoder extends ByteToMessageDecoder {
@@ -38,6 +40,7 @@ public class ThriftBinaryProtocolDecoder extends ByteToMessageDecoder {
 
             try {
                 switch (header.GetType()) {
+
 
                     case RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ: {
                         TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);

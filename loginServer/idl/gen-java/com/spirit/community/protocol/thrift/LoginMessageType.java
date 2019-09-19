@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.spirit.community.rtc.login.protocol.rpc.thrift;
+package com.spirit.community.protocol.thrift;
 
 
 import java.util.Map;

@@ -1,5 +1,5 @@
 //namespace cpp community.common
-namespace java com.spirit.community.rtc.login.protocol.rpc.thrift
+namespace java com.spirit.community.protocol.thrift
 
 enum CommonMessageType
 {
