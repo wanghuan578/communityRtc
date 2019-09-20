@@ -5,8 +5,8 @@ public enum ExceptionCode {
 
 
     SUCCESS("0000", "OK"),
-    SERIALIZE_EXCEPTION("0001", "序列化失败"),
-    DESERIALIZE_EXCEPTION("0002", "反序列化失败"),
+    USERINFO_NOT_EXIST("0001", "用户不存在"),
+    USERID_OR_PASSWD_INVALID("0002", "账号或密码错误"),
     DUPLICATED_REGISTER_EXCEPTION("0003", "重复注册监听"),
     SERVICE_LIST_EMPTY_EXCEPTION("0004", "服务列表为空"),
     NODE_SERVICE_DATA_EMPTY_EXCEPTION("0005", "节点服务数据为空"),

@@ -1,19 +1,19 @@
 package com.spirit.community.rtc.login.biz;
 
 public class RpcEventType {
-    public static final int MT_COMMON_HELLO_NOTIFY    						        = 100;
-    public static final int MT_CLIENT_PASSWORD_LOGIN_REQ    						= 500;
-    public static final int MT_CLIENT_LOGIN_RES    						            = 501;
+    public final static int MT_HELLO_REQ                                                = 100;
+    public final static int MT_HELLO_RES                                                = 101;
+    public final static int MT_HELLO_NOTIFY                                             = 102;
+    public final static int MT_KEEPALIVE_REQ                                            = 103;
+    public final static int MT_KEEPALIVE_RES                                            = 104;
 
-    public static final int MT_SERVICE_REGISTER_REQ    						        = 1200;
-    public static final int MT_SERVICE_REGISTER_RES    						        = 1201;
-
-    public static final int MT_SERVICE_LIST_REQ    						            = 1100;
-    public static final int MT_SERVICE_LIST_RES    						            = 1101;
-    public static final int MT_SERVICE_LIST_CHANGE_NOTIFY   						= 1102;
-    public static final int MT_SERVICE_LIST_CHANGE_RES   						    = 1103;
-    public static final int MT_SERVICE_QUALITY_SYNC_REQ   						    = 1500;
-    public static final int MT_SERVICE_QUALITY_SYNC_RES   						    = 1501;
+    public final static int MT_CLIENT_REGISTER_REQ                                      = 500;
+    public final static int MT_CLIENT_REGISTER_RES                                      = 501;
+    public final static int MT_CLIENT_PASSWORD_LOGIN_REQ                                = 502;
+    public final static int MT_CLIENT_LOGIN_RES                                         = 503;
+    public final static int MT_CLIENT_LOGOUT_REQ                                        = 504;
+    public final static int MT_CLIENT_LOGOUT_RES                                        = 505;
+    public final static int MT_UPDATE_AVAILABLE_RES                                     = 506;
 
 
 }

@@ -3,6 +3,7 @@ package com.spirit.community.rtc.login.biz;
 import java.util.List;
 
 import com.spirit.community.rtc.login.protocol.rpc.thrift.ClientPasswordLoginReq;
+import com.spirit.community.rtc.login.protocol.rpc.thrift.UserRegisterReq;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.TsRpcByteBuffer;
 import com.spirit.tba.core.TsRpcEventParser;
@@ -41,12 +42,17 @@ public class ThriftBinaryProtocolDecoder extends ByteToMessageDecoder {
             try {
                 switch (header.GetType()) {
 
-
                     case RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ: {
                         TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);
                         out.add(protocol.Decode(ClientPasswordLoginReq.class));
                     }
                         break;
+
+                    case RpcEventType.MT_CLIENT_REGISTER_REQ: {
+                        TsRpcProtocolFactory<UserRegisterReq> protocol = new TsRpcProtocolFactory<UserRegisterReq>(msg);
+                        out.add(protocol.Decode(UserRegisterReq.class));
+                    }
+                    break;
 
 
                     default:
