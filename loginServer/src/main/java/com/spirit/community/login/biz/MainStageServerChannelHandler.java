@@ -117,6 +117,8 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
             info.setNickName(entity.getNick_name());
             info.setPassword(entity.getPassword());
             info.setGender(entity.getGender());
+            info.setInvitationCode(entity.invitation_code);
+            info.setIdentificationCardId(entity.identity_card);
 
             UserRegisterRes res = new UserRegisterRes();
 
