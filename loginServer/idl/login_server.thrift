@@ -3,9 +3,9 @@
 //3)会话key:  login_server:随机产生，用于通讯密码
 include "common.thrift"
 //namespace cpp community.login_server
-namespace java com.spirit.community.protocol.thrift
+namespace java com.spirit.community.protocol.thrift.login
 
-enum LoginMessageType
+enum MessageType
 {   
 	MT_CLIENT_REGISTER_REQ = 500,
 	MT_CLIENT_REGISTER_RES,

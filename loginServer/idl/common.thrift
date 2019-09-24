@@ -1,7 +1,7 @@
 //namespace cpp community.common
-namespace java com.spirit.community.protocol.thrift
+namespace java com.spirit.community.protocol.thrift.common
 
-enum CommonMessageType
+enum MessageType
 {
     MT_HELLO_REQ 		= 100, 					
     MT_HELLO_RES,
@@ -94,6 +94,8 @@ struct SessionTicket
     10:string   session_key,                    //会话key
     11:i64      create_time,                    //创建时间(秒为单位)
     12:i64      end_time,                       //截止时间(秒为单位)
+	13:string   signal_server,
+	14:string   ice_server,
 }
 
 //空结构(用于没消息体的消息)
