@@ -1,4 +1,4 @@
-package com.spirit.essential;
+package com.spirit.community.rtc.login;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EssentialApplicationTests {
+public class LoginApplicationTests {
 
     @Test
     public void contextLoads() {

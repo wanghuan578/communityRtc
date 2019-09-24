@@ -5,6 +5,6 @@ import com.spirit.community.rtc.login.service.dao.entity.UserInfo;
 
 public interface UserInfoService {
     boolean identity(Long uid, String passwd) throws MainStageException;
-    void register(UserInfo info);
+    UserInfo register(UserInfo info);
     void removeUser(Long uid);
 }

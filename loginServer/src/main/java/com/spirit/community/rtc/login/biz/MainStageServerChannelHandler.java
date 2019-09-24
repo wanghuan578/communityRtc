@@ -106,9 +106,10 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
             UserRegisterRes res = new UserRegisterRes();
 
             try {
-                userInfoService.register(info);
+                UserInfo s = userInfoService.register(info);
                 res.error_code = 0;
                 res.error_text = "OK";
+                res.user_id =   String.valueOf(s.getUserId());
             }
             catch (Exception e) {
                 res.error_code = Short.valueOf(UNEXPECTED_EXCEPTION.code());

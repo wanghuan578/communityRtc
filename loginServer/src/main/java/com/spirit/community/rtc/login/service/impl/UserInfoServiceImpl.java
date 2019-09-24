@@ -37,8 +37,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public void register(UserInfo info) {
-        userInfoRepository.save(info);
+    public UserInfo register(UserInfo info) {
+        return userInfoRepository.save(info);
     }
 
     @Override
