@@ -16,6 +16,7 @@ public class UserInfo implements Serializable {
     private String nickName;
     private String identificationCardId;
     private Short gender;
+    private String invitationCode;
 
 
 }

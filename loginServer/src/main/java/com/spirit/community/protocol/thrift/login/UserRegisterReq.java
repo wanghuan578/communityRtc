@@ -23,6 +23,8 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
   private static final org.apache.thrift.protocol.TField SESSION_KEY_FIELD_DESC = new org.apache.thrift.protocol.TField("session_key", org.apache.thrift.protocol.TType.STRING, (short)10);
   private static final org.apache.thrift.protocol.TField CELLPHONE_FIELD_DESC = new org.apache.thrift.protocol.TField("cellphone", org.apache.thrift.protocol.TType.STRING, (short)11);
   private static final org.apache.thrift.protocol.TField PASSWORD_FIELD_DESC = new org.apache.thrift.protocol.TField("password", org.apache.thrift.protocol.TType.STRING, (short)12);
+  private static final org.apache.thrift.protocol.TField INVITATION_CODE_FIELD_DESC = new org.apache.thrift.protocol.TField("invitation_code", org.apache.thrift.protocol.TType.STRING, (short)13);
+  private static final org.apache.thrift.protocol.TField IDENTITY_CARD_FIELD_DESC = new org.apache.thrift.protocol.TField("identity_card", org.apache.thrift.protocol.TType.STRING, (short)14);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new UserRegisterReqStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new UserRegisterReqTupleSchemeFactory();
@@ -39,6 +41,8 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
   public java.lang.String session_key; // required
   public java.lang.String cellphone; // required
   public java.lang.String password; // required
+  public java.lang.String invitation_code; // required
+  public java.lang.String identity_card; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -53,7 +57,9 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     SESSION_ID((short)9, "session_id"),
     SESSION_KEY((short)10, "session_key"),
     CELLPHONE((short)11, "cellphone"),
-    PASSWORD((short)12, "password");
+    PASSWORD((short)12, "password"),
+    INVITATION_CODE((short)13, "invitation_code"),
+    IDENTITY_CARD((short)14, "identity_card");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -92,6 +98,10 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
           return CELLPHONE;
         case 12: // PASSWORD
           return PASSWORD;
+        case 13: // INVITATION_CODE
+          return INVITATION_CODE;
+        case 14: // IDENTITY_CARD
+          return IDENTITY_CARD;
         default:
           return null;
       }
@@ -162,6 +172,10 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.PASSWORD, new org.apache.thrift.meta_data.FieldMetaData("password", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.INVITATION_CODE, new org.apache.thrift.meta_data.FieldMetaData("invitation_code", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.IDENTITY_CARD, new org.apache.thrift.meta_data.FieldMetaData("identity_card", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(UserRegisterReq.class, metaDataMap);
   }
@@ -181,7 +195,9 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     java.lang.String session_id,
     java.lang.String session_key,
     java.lang.String cellphone,
-    java.lang.String password)
+    java.lang.String password,
+    java.lang.String invitation_code,
+    java.lang.String identity_card)
   {
     this();
     this.user_name = user_name;
@@ -198,6 +214,8 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     this.session_key = session_key;
     this.cellphone = cellphone;
     this.password = password;
+    this.invitation_code = invitation_code;
+    this.identity_card = identity_card;
   }
 
   /**
@@ -237,6 +255,12 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     if (other.isSetPassword()) {
       this.password = other.password;
     }
+    if (other.isSetInvitation_code()) {
+      this.invitation_code = other.invitation_code;
+    }
+    if (other.isSetIdentity_card()) {
+      this.identity_card = other.identity_card;
+    }
   }
 
   public UserRegisterReq deepCopy() {
@@ -259,6 +283,8 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     this.session_key = null;
     this.cellphone = null;
     this.password = null;
+    this.invitation_code = null;
+    this.identity_card = null;
   }
 
   public java.lang.String getUser_name() {
@@ -547,6 +573,54 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     }
   }
 
+  public java.lang.String getInvitation_code() {
+    return this.invitation_code;
+  }
+
+  public UserRegisterReq setInvitation_code(java.lang.String invitation_code) {
+    this.invitation_code = invitation_code;
+    return this;
+  }
+
+  public void unsetInvitation_code() {
+    this.invitation_code = null;
+  }
+
+  /** Returns true if field invitation_code is set (has been assigned a value) and false otherwise */
+  public boolean isSetInvitation_code() {
+    return this.invitation_code != null;
+  }
+
+  public void setInvitation_codeIsSet(boolean value) {
+    if (!value) {
+      this.invitation_code = null;
+    }
+  }
+
+  public java.lang.String getIdentity_card() {
+    return this.identity_card;
+  }
+
+  public UserRegisterReq setIdentity_card(java.lang.String identity_card) {
+    this.identity_card = identity_card;
+    return this;
+  }
+
+  public void unsetIdentity_card() {
+    this.identity_card = null;
+  }
+
+  /** Returns true if field identity_card is set (has been assigned a value) and false otherwise */
+  public boolean isSetIdentity_card() {
+    return this.identity_card != null;
+  }
+
+  public void setIdentity_cardIsSet(boolean value) {
+    if (!value) {
+      this.identity_card = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, java.lang.Object value) {
     switch (field) {
     case USER_NAME:
@@ -645,6 +719,22 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       }
       break;
 
+    case INVITATION_CODE:
+      if (value == null) {
+        unsetInvitation_code();
+      } else {
+        setInvitation_code((java.lang.String)value);
+      }
+      break;
+
+    case IDENTITY_CARD:
+      if (value == null) {
+        unsetIdentity_card();
+      } else {
+        setIdentity_card((java.lang.String)value);
+      }
+      break;
+
     }
   }
 
@@ -686,6 +776,12 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     case PASSWORD:
       return getPassword();
 
+    case INVITATION_CODE:
+      return getInvitation_code();
+
+    case IDENTITY_CARD:
+      return getIdentity_card();
+
     }
     throw new java.lang.IllegalStateException();
   }
@@ -721,6 +817,10 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       return isSetCellphone();
     case PASSWORD:
       return isSetPassword();
+    case INVITATION_CODE:
+      return isSetInvitation_code();
+    case IDENTITY_CARD:
+      return isSetIdentity_card();
     }
     throw new java.lang.IllegalStateException();
   }
@@ -848,6 +948,24 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
         return false;
     }
 
+    boolean this_present_invitation_code = true && this.isSetInvitation_code();
+    boolean that_present_invitation_code = true && that.isSetInvitation_code();
+    if (this_present_invitation_code || that_present_invitation_code) {
+      if (!(this_present_invitation_code && that_present_invitation_code))
+        return false;
+      if (!this.invitation_code.equals(that.invitation_code))
+        return false;
+    }
+
+    boolean this_present_identity_card = true && this.isSetIdentity_card();
+    boolean that_present_identity_card = true && that.isSetIdentity_card();
+    if (this_present_identity_card || that_present_identity_card) {
+      if (!(this_present_identity_card && that_present_identity_card))
+        return false;
+      if (!this.identity_card.equals(that.identity_card))
+        return false;
+    }
+
     return true;
   }
 
@@ -898,6 +1016,14 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
     hashCode = hashCode * 8191 + ((isSetPassword()) ? 131071 : 524287);
     if (isSetPassword())
       hashCode = hashCode * 8191 + password.hashCode();
+
+    hashCode = hashCode * 8191 + ((isSetInvitation_code()) ? 131071 : 524287);
+    if (isSetInvitation_code())
+      hashCode = hashCode * 8191 + invitation_code.hashCode();
+
+    hashCode = hashCode * 8191 + ((isSetIdentity_card()) ? 131071 : 524287);
+    if (isSetIdentity_card())
+      hashCode = hashCode * 8191 + identity_card.hashCode();
 
     return hashCode;
   }
@@ -1030,6 +1156,26 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
         return lastComparison;
       }
     }
+    lastComparison = java.lang.Boolean.valueOf(isSetInvitation_code()).compareTo(other.isSetInvitation_code());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetInvitation_code()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.invitation_code, other.invitation_code);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = java.lang.Boolean.valueOf(isSetIdentity_card()).compareTo(other.isSetIdentity_card());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetIdentity_card()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.identity_card, other.identity_card);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1135,6 +1281,22 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       sb.append("null");
     } else {
       sb.append(this.password);
+    }
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("invitation_code:");
+    if (this.invitation_code == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.invitation_code);
+    }
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("identity_card:");
+    if (this.identity_card == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.identity_card);
     }
     first = false;
     sb.append(")");
@@ -1278,6 +1440,22 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 13: // INVITATION_CODE
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.invitation_code = iprot.readString();
+              struct.setInvitation_codeIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 14: // IDENTITY_CARD
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+              struct.identity_card = iprot.readString();
+              struct.setIdentity_cardIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -1349,6 +1527,16 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
         oprot.writeString(struct.password);
         oprot.writeFieldEnd();
       }
+      if (struct.invitation_code != null) {
+        oprot.writeFieldBegin(INVITATION_CODE_FIELD_DESC);
+        oprot.writeString(struct.invitation_code);
+        oprot.writeFieldEnd();
+      }
+      if (struct.identity_card != null) {
+        oprot.writeFieldBegin(IDENTITY_CARD_FIELD_DESC);
+        oprot.writeString(struct.identity_card);
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1403,7 +1591,13 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       if (struct.isSetPassword()) {
         optionals.set(11);
       }
-      oprot.writeBitSet(optionals, 12);
+      if (struct.isSetInvitation_code()) {
+        optionals.set(12);
+      }
+      if (struct.isSetIdentity_card()) {
+        optionals.set(13);
+      }
+      oprot.writeBitSet(optionals, 14);
       if (struct.isSetUser_name()) {
         oprot.writeString(struct.user_name);
       }
@@ -1440,12 +1634,18 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       if (struct.isSetPassword()) {
         oprot.writeString(struct.password);
       }
+      if (struct.isSetInvitation_code()) {
+        oprot.writeString(struct.invitation_code);
+      }
+      if (struct.isSetIdentity_card()) {
+        oprot.writeString(struct.identity_card);
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, UserRegisterReq struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-      java.util.BitSet incoming = iprot.readBitSet(12);
+      java.util.BitSet incoming = iprot.readBitSet(14);
       if (incoming.get(0)) {
         struct.user_name = iprot.readString();
         struct.setUser_nameIsSet(true);
@@ -1493,6 +1693,14 @@ public class UserRegisterReq implements org.apache.thrift.TBase<UserRegisterReq,
       if (incoming.get(11)) {
         struct.password = iprot.readString();
         struct.setPasswordIsSet(true);
+      }
+      if (incoming.get(12)) {
+        struct.invitation_code = iprot.readString();
+        struct.setInvitation_codeIsSet(true);
+      }
+      if (incoming.get(13)) {
+        struct.identity_card = iprot.readString();
+        struct.setIdentity_cardIsSet(true);
       }
     }
   }

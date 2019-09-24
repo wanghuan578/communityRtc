@@ -86,6 +86,8 @@ struct UserRegisterReq
     10:string   session_key,                    //»á»°key
     11:string 	cellphone,
     12:string   password,
+	13:string   invitation_code,
+	14:string   identity_card,
 }
 
 struct UserRegisterRes
