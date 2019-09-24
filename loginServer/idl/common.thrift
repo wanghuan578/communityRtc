@@ -70,6 +70,13 @@ struct HelloReq
     1:ServiceInfo service_info,
 }
 
+struct IceServer
+{
+    1:string 	url,
+	2:string	user,
+	3:string	passwd,
+}
+
 struct HelloNotify
 {
     1:i16       error_code,
@@ -95,7 +102,7 @@ struct SessionTicket
     11:i64      create_time,                    //创建时间(秒为单位)
     12:i64      end_time,                       //截止时间(秒为单位)
 	13:string   signal_server,
-	14:string   ice_server,
+	14:IceServer   ice_server,
 }
 
 //空结构(用于没消息体的消息)

@@ -2,6 +2,7 @@ package com.spirit.community.login.biz;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
+import com.spirit.community.protocol.thrift.common.IceServer;
 import com.spirit.community.protocol.thrift.common.SessionTicket;
 import com.spirit.community.protocol.thrift.login.*;
 import com.spirit.community.login.common.exception.MainStageException;
@@ -75,9 +76,15 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
 
                 res.error_code = Short.valueOf(SUCCESS.code());
                 res.error_text = SUCCESS.text();
+
                 SessionTicket ticket = new SessionTicket();
                 ticket.signal_server = "https://47.100.251.132";
-                ticket.ice_server = "turn:coturn.86bba.com:3478";
+                IceServer iceServer = new IceServer();
+                iceServer.url = "turn:coturn.86bba.com:3478";
+                iceServer.user = "spirit";
+                iceServer.passwd = "spirit";
+                ticket.ice_server = iceServer;
+
                 byte[] sessionTicket = new TbaUtil<SessionTicket>().Serialize(ticket, 256);
                 res.session_ticket = new String(sessionTicket, "ISO8859-1");
             } catch (IllegalAccessException | InstantiationException | UnsupportedEncodingException | TbaException e) {

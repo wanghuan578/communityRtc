@@ -24,7 +24,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
   private static final org.apache.thrift.protocol.TField CREATE_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("create_time", org.apache.thrift.protocol.TType.I64, (short)11);
   private static final org.apache.thrift.protocol.TField END_TIME_FIELD_DESC = new org.apache.thrift.protocol.TField("end_time", org.apache.thrift.protocol.TType.I64, (short)12);
   private static final org.apache.thrift.protocol.TField SIGNAL_SERVER_FIELD_DESC = new org.apache.thrift.protocol.TField("signal_server", org.apache.thrift.protocol.TType.STRING, (short)13);
-  private static final org.apache.thrift.protocol.TField ICE_SERVER_FIELD_DESC = new org.apache.thrift.protocol.TField("ice_server", org.apache.thrift.protocol.TType.STRING, (short)14);
+  private static final org.apache.thrift.protocol.TField ICE_SERVER_FIELD_DESC = new org.apache.thrift.protocol.TField("ice_server", org.apache.thrift.protocol.TType.STRUCT, (short)14);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new SessionTicketStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new SessionTicketTupleSchemeFactory();
@@ -42,7 +42,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
   public long create_time; // required
   public long end_time; // required
   public java.lang.String signal_server; // required
-  public java.lang.String ice_server; // required
+  public IceServer ice_server; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -177,7 +177,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
     tmpMap.put(_Fields.SIGNAL_SERVER, new org.apache.thrift.meta_data.FieldMetaData("signal_server", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.ICE_SERVER, new org.apache.thrift.meta_data.FieldMetaData("ice_server", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+        new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, IceServer.class)));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(SessionTicket.class, metaDataMap);
   }
@@ -199,7 +199,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
     long create_time,
     long end_time,
     java.lang.String signal_server,
-    java.lang.String ice_server)
+    IceServer ice_server)
   {
     this();
     this.user_id = user_id;
@@ -259,7 +259,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
       this.signal_server = other.signal_server;
     }
     if (other.isSetIce_server()) {
-      this.ice_server = other.ice_server;
+      this.ice_server = new IceServer(other.ice_server);
     }
   }
 
@@ -597,11 +597,11 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
     }
   }
 
-  public java.lang.String getIce_server() {
+  public IceServer getIce_server() {
     return this.ice_server;
   }
 
-  public SessionTicket setIce_server(java.lang.String ice_server) {
+  public SessionTicket setIce_server(IceServer ice_server) {
     this.ice_server = ice_server;
     return this;
   }
@@ -731,7 +731,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
       if (value == null) {
         unsetIce_server();
       } else {
-        setIce_server((java.lang.String)value);
+        setIce_server((IceServer)value);
       }
       break;
 
@@ -1294,6 +1294,9 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
     // check for sub-struct validity
+    if (ice_server != null) {
+      ice_server.validate();
+    }
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -1437,8 +1440,9 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
             }
             break;
           case 14: // ICE_SERVER
-            if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.ice_server = iprot.readString();
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+              struct.ice_server = new IceServer();
+              struct.ice_server.read(iprot);
               struct.setIce_serverIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
@@ -1518,7 +1522,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
       }
       if (struct.ice_server != null) {
         oprot.writeFieldBegin(ICE_SERVER_FIELD_DESC);
-        oprot.writeString(struct.ice_server);
+        struct.ice_server.write(oprot);
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
@@ -1622,7 +1626,7 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
         oprot.writeString(struct.signal_server);
       }
       if (struct.isSetIce_server()) {
-        oprot.writeString(struct.ice_server);
+        struct.ice_server.write(oprot);
       }
     }
 
@@ -1683,7 +1687,8 @@ public class SessionTicket implements org.apache.thrift.TBase<SessionTicket, Ses
         struct.setSignal_serverIsSet(true);
       }
       if (incoming.get(13)) {
-        struct.ice_server = iprot.readString();
+        struct.ice_server = new IceServer();
+        struct.ice_server.read(iprot);
         struct.setIce_serverIsSet(true);
       }
     }
