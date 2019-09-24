@@ -17,6 +17,7 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
@@ -122,15 +123,21 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
 
             UserRegisterRes res = new UserRegisterRes();
 
-            try {
-                UserInfo s = userInfoService.register(info);
-                res.error_code = 0;
-                res.error_text = "OK";
-                res.user_id =   String.valueOf(s.getUserId());
+            if (!StringUtils.equalsIgnoreCase(entity.invitation_code, "sxkj") && !StringUtils.equalsIgnoreCase(entity.invitation_code, "guest")) {
+                res.error_code = Short.valueOf(INVITE_CODE_INVALID.code());
+                res.error_text = INVITE_CODE_INVALID.text();
             }
-            catch (Exception e) {
-                res.error_code = Short.valueOf(UNEXPECTED_EXCEPTION.code());
-                res.error_text = UNEXPECTED_EXCEPTION.text();
+            else {
+                try {
+                    UserInfo s = userInfoService.register(info);
+                    res.error_code = 0;
+                    res.error_text = "OK";
+                    res.user_id =   String.valueOf(s.getUserId());
+                }
+                catch (Exception e) {
+                    res.error_code = Short.valueOf(UNEXPECTED_EXCEPTION.code());
+                    res.error_text = UNEXPECTED_EXCEPTION.text();
+                }
             }
 
             TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_REGISTER_RES);
