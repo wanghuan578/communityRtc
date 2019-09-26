@@ -10,9 +10,9 @@ import com.spirit.community.login.service.UserInfoService;
 import com.spirit.community.login.service.dao.entity.UserInfo;
 import com.spirit.community.login.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
-import com.spirit.tba.core.TsEvent;
+import com.spirit.tba.core.TbaEvent;
 import com.spirit.tba.core.TsRpcHead;
-import com.spirit.tba.utils.TbaUtil;
+import com.spirit.tba.tools.TbaToolsKit;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -40,16 +40,17 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-        long serverRandom = new Random().nextLong();
+        long rnd = new Random().nextLong();
+        long serverRandom = rnd > 0 ? rnd : rnd * (-1);
 
-        HelloNotify body = new HelloNotify();
-        body.setServer_random(serverRandom);
-        body.setService_id(1000);
-        body.setError_code((short)0);
-        body.setError_text("OK");
+        HelloNotify notify = new HelloNotify();
+        notify.error_code = 20001;
+        notify.setServer_random(serverRandom);
+        notify.setService_id(1000);
+        notify.setError_text("OK");
 
         TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
-        ctx.write(new TsEvent(head, body, 1024));
+        ctx.write(new TbaEvent(head, notify, 1024, false));
         ctx.flush();
     }
 
@@ -71,7 +72,7 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
 
             ClientLoginRes res = new ClientLoginRes();
             try {
-                ClientPasswordLoginReqChecksum checksum = new TbaUtil<ClientPasswordLoginReqChecksum>().Deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
+                ClientPasswordLoginReqChecksum checksum = new TbaToolsKit<ClientPasswordLoginReqChecksum>().deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
                 log.info("ClientPasswordLoginReqChecksum: {}", JSON.toJSONString(checksum, true));
                 userInfoService.identity(entity.user_id, checksum.password);
 
@@ -86,7 +87,7 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
                 iceServer.passwd = "spirit";
                 ticket.ice_server = iceServer;
 
-                byte[] sessionTicket = new TbaUtil<SessionTicket>().Serialize(ticket, 256);
+                byte[] sessionTicket = new TbaToolsKit<SessionTicket>().serialize(ticket, 256);
                 res.session_ticket = new String(sessionTicket, "ISO8859-1");
             } catch (IllegalAccessException | InstantiationException | UnsupportedEncodingException | TbaException e) {
                 log.error(e.getLocalizedMessage(), e);
@@ -105,7 +106,7 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
             }
 
             TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
-            ctx.write(new TsEvent(head, res, 1024));
+            ctx.write(new TbaEvent(head, res, 1024, true));
             ctx.flush();
         }
         if (msg instanceof UserRegisterReq) {
@@ -141,7 +142,7 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
             }
 
             TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_REGISTER_RES);
-            ctx.write(new TsEvent(head, res, 1024));
+            ctx.write(new TbaEvent(head, res, 1024, false));
             ctx.flush();
         }
 

@@ -2,7 +2,8 @@ package com.spirit.community.login.biz;
 
 
 import com.spirit.tba.Exception.TbaException;
-import com.spirit.tba.core.TsEvent;
+import com.spirit.tba.core.TbaAes;
+import com.spirit.tba.core.TbaEvent;
 import com.spirit.tba.core.TsRpcHead;
 import com.spirit.tba.core.TsRpcProtocolFactory;
 import io.netty.buffer.ByteBuf;
@@ -17,14 +18,20 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
 
-		TsEvent ev = (TsEvent) msg;
+		TbaEvent ev = (TbaEvent) msg;
 
 		try {
 			TsRpcHead head = ev.getHead();
-			TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLen());
+			TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
 			byte[] buf = protocol.Encode().OutStream().GetBytes();
 			log.info("encode msg len: {}", buf.length);
-			out.writeBytes(buf, 0, buf.length);
+
+			if (ev.isEncrypt()) {
+				out.writeBytes(TbaAes.encrypt(new String(buf, "ISO8859-1"), "123").getBytes(), 0, buf.length);
+			}
+			else {
+				out.writeBytes(buf, 0, buf.length);
+			}
 		}
 		catch (TbaException e) {
 			log.error(e.getLocalizedMessage(), e);
