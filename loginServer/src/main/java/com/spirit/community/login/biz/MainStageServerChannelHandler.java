@@ -49,34 +49,34 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
         notify.setService_id(1000);
         notify.setError_text("OK");
 
-        ClientLoginRes res = new ClientLoginRes();
-        res.error_text = "OK";
-        res.error_code = 0;
-        TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
-        TbaEvent ev = new TbaEvent(head, res, 1024, true);
+//        ClientLoginRes res = new ClientLoginRes();
+//        res.error_text = "OK";
+//        res.error_code = 0;
+//        TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
+//        TbaEvent ev = new TbaEvent(head, res, 1024, true);
+//
+//        if (ev.isEncrypt()) {
+//            TsRpcHead h = ev.getHead();
+//            TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), h, ev.getLength());
+//            byte[] buf = protocol.Encode().OutStream().GetBytes();
+//            log.info("encode msg len: {}", buf.length);
+//
+//            String encrypt = TbaAes.encrypt(new String(buf, "ISO8859-1"), "123");
+//
+//            String original = TbaAes.decrypt(encrypt, "123");
+//            byte[] msg00 = original.getBytes("ISO8859-1");
+//            TsRpcByteBuffer buffer = new TsRpcByteBuffer(msg00, msg00.length);
+//
+//            TsRpcEventParser parser = new TsRpcEventParser(buffer);
+//            TsRpcHead header = parser.Head();
+//            log.info("head type: {}", header.GetType());
+//
+//            TsRpcProtocolFactory<ClientLoginRes> protocol00 = new TsRpcProtocolFactory<ClientLoginRes>(buffer);
+//            ClientLoginRes resp = protocol00.Decode(ClientLoginRes.class);
+//            log.info("resp: {}", JSON.toJSONString(resp, true));
+//        }
 
-        if (ev.isEncrypt()) {
-            TsRpcHead h = ev.getHead();
-            TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), h, ev.getLength());
-            byte[] buf = protocol.Encode().OutStream().GetBytes();
-            log.info("encode msg len: {}", buf.length);
-
-            String encrypt = TbaAes.encrypt(new String(buf, "ISO8859-1"), "123");
-
-            String original = TbaAes.decrypt(encrypt, "123");
-            byte[] msg00 = original.getBytes("ISO8859-1");
-            TsRpcByteBuffer buffer = new TsRpcByteBuffer(msg00, msg00.length);
-
-            TsRpcEventParser parser = new TsRpcEventParser(buffer);
-            TsRpcHead header = parser.Head();
-            log.info("head type: {}", header.GetType());
-
-            TsRpcProtocolFactory<ClientLoginRes> protocol00 = new TsRpcProtocolFactory<ClientLoginRes>(buffer);
-            ClientLoginRes resp = protocol00.Decode(ClientLoginRes.class);
-            log.info("resp: {}", JSON.toJSONString(resp, true));
-        }
-
-        //TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
+        TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
         ctx.write(new TbaEvent(head, notify, 1024, false));
         ctx.flush();
     }
