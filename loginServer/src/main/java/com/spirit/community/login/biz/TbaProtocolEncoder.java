@@ -2,10 +2,7 @@ package com.spirit.community.login.biz;
 
 
 import com.spirit.tba.Exception.TbaException;
-import com.spirit.tba.core.TbaAes;
-import com.spirit.tba.core.TbaEvent;
-import com.spirit.tba.core.TsRpcHead;
-import com.spirit.tba.core.TsRpcProtocolFactory;
+import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -21,15 +18,24 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 		TbaEvent ev = (TbaEvent) msg;
 
 		try {
-			TsRpcHead head = ev.getHead();
-			TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-			byte[] buf = protocol.Encode().OutStream().GetBytes();
-			log.info("encode msg len: {}", buf.length);
-
 			if (ev.isEncrypt()) {
-				out.writeBytes(TbaAes.encrypt(new String(buf, "ISO8859-1"), "123").getBytes(), 0, buf.length);
+				TsRpcHead head = ev.getHead();
+				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
+				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				//log.info("encode msg len: {}", buf.length);
+
+				String encrypt = TbaAes.encrypt(new String(buf, "ISO8859-1"), "123");
+				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 4);
+				byteBuff.WriteI32(encrypt.length() + 4);
+				byteBuff.copy(encrypt.getBytes());
+				byte [] o = byteBuff.GetBytes();
+				out.writeBytes(o, 0, o.length);
 			}
 			else {
+				TsRpcHead head = ev.getHead();
+				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
+				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				log.info("encode msg len: {}", buf.length);
 				out.writeBytes(buf, 0, buf.length);
 			}
 		}
