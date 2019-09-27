@@ -4,10 +4,7 @@ import java.util.List;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
 import com.spirit.tba.Exception.TbaException;
-import com.spirit.tba.core.TsRpcByteBuffer;
-import com.spirit.tba.core.TsRpcEventParser;
-import com.spirit.tba.core.TsRpcHead;
-import com.spirit.tba.core.TsRpcProtocolFactory;
+import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -24,13 +21,32 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
         // TODO Auto-generated method stub
 
         while (in.readableBytes() > 4) {
-            
-            int msg_len = in.readInt();
-            TsRpcByteBuffer msg = new TsRpcByteBuffer(msg_len);
-            msg.WriteI32(msg_len);
 
-            for (int i = 0; i < msg_len - 4; i++) {
-                msg.WriteByte(in.readByte());
+            int msg_len = in.readInt();
+            short flag = in.readShort();
+
+            TsRpcByteBuffer msg = null;
+
+            if(flag == Encrypt.TYPE_ENABLE) {
+
+                byte[] encrypt = new byte[msg_len - 4];
+                for (int i = 0; i < msg_len - 4; i++) {
+                    encrypt[i] = in.readByte();
+                }
+
+                String key = "123";
+                //String original = TbaAes.decrypt(new String(encrypt, "utf-8"), "123");
+                String original = TbaAes.decode(new String(encrypt, "utf-8"), key);
+                byte[] msg00 = original.getBytes("ISO8859-1");
+                msg = new TsRpcByteBuffer(msg00, msg00.length);
+            }
+            else {
+                msg = new TsRpcByteBuffer(msg_len);
+                msg.WriteI32(msg_len);
+                msg.WriteI16(flag);
+                for (int i = 0; i < msg_len - 6; i++) {
+                    msg.WriteByte(in.readByte());
+                }
             }
 
             TsRpcEventParser parser = new TsRpcEventParser(msg);

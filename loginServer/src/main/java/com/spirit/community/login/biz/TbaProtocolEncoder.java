@@ -28,8 +28,10 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				String key = "123";
 				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);
 
-				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 4);
+				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 6);
+
 				byteBuff.WriteI32(encrypt.length() + 4);
+				byteBuff.WriteI16((short)1);
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
 				log.info("o len: {}", o.length);
