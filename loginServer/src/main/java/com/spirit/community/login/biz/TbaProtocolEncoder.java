@@ -24,7 +24,10 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				byte[] buf = protocol.Encode().OutStream().GetBytes();
 				//log.info("encode msg len: {}", buf.length);
 
-				String encrypt = TbaAes.encrypt(new String(buf, "ISO8859-1"), "123");
+				//String encrypt = TbaAes.encrypt(new String(buf, "ISO8859-1"), "123");
+				String key = "123";
+				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);
+
 				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 4);
 				byteBuff.WriteI32(encrypt.length() + 4);
 				byteBuff.copy(encrypt.getBytes());
