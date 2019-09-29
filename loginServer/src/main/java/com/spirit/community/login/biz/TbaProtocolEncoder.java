@@ -34,14 +34,14 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				byteBuff.WriteI16((short)1);
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
-				log.info("o len: {}", o.length);
+				log.info("encrypt out buff len: {}", o.length);
 				out.writeBytes(o, 0, o.length);
 			}
 			else {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
 				byte[] buf = protocol.Encode().OutStream().GetBytes();
-				log.info("encode msg len: {}", buf.length);
+				log.info("out buff len: {}", buf.length);
 				out.writeBytes(buf, 0, buf.length);
 			}
 		}
