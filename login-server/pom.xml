@@ -3,15 +3,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.7.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>com.spirit</groupId>
+        <artifactId>community</artifactId>
+        <version>1.0.0</version>
     </parent>
-    <groupId>com.spirit</groupId>
-    <artifactId>loginServer</artifactId>
+	
+    <groupId>com.spirit.community</groupId>
+    <artifactId>login-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>loginServer</name>
+    <name>login-server</name>
     <description>Community Rtc LoginServer</description>
 
     <properties>
