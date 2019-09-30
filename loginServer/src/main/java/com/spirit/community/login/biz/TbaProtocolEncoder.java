@@ -28,7 +28,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				byte[] buf = protocol.Encode().OutStream().GetBytes();
 
 				SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-				Session session = factory.get(ctx.channel().id().asLongText());
+				Session session = factory.getSessionById(ctx.channel().id().asLongText());
 				String key = String.valueOf(session.getServerRandom());
 				log.info("encrypt key: {}", key);
 				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);

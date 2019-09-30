@@ -17,12 +17,12 @@ public class SessionFactory {
         sessionMap = new ConcurrentHashMap<>();
     }
 
-    public void add(Session session) {
+    public void addSession(Session session) {
         log.info("add session: {}", JSON.toJSONString(session, true));
         sessionMap.put(session.getId(), session);
     }
 
-    public Session get(String channelId) {
+    public Session getSessionById(String channelId) {
         return sessionMap.get(channelId);
     }
 
@@ -31,7 +31,7 @@ public class SessionFactory {
         sessionMap.put(session.getId(), session);
     }
 
-    public Session remove(String channelId) {
+    public Session removeById(String channelId) {
         return sessionMap.remove(channelId);
     }
 

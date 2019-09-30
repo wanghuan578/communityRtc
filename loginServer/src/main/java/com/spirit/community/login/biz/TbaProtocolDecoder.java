@@ -37,7 +37,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 }
 
                 SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-                Session session = factory.get(ctx.channel().id().asLongText());
+                Session session = factory.getSessionById(ctx.channel().id().asLongText());
                 String serverRandom = String.valueOf(session.getServerRandom());
                 log.info("decrypt key: {}", serverRandom);
                 String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);

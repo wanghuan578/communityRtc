@@ -54,12 +54,12 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
         ctx.flush();
 
         Session session = new Session(ctx, serverRandom);
-        sessionFactory.add(session);
+        sessionFactory.addSession(session);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        sessionFactory.remove(ctx.channel().id().asLongText());
+        sessionFactory.removeById(ctx.channel().id().asLongText());
     }
     
     @Override
@@ -75,7 +75,7 @@ public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter 
                 ClientPasswordLoginReqChecksum checksum = new TbaToolsKit<ClientPasswordLoginReqChecksum>().deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
                 log.info("ClientPasswordLoginReqChecksum: {}", JSON.toJSONString(checksum, true));
 
-                Session session = sessionFactory.get(ctx.channel().id().asLongText());
+                Session session = sessionFactory.getSessionById(ctx.channel().id().asLongText());
                 if (session.getServerRandom() != checksum.getServer_random()) {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
