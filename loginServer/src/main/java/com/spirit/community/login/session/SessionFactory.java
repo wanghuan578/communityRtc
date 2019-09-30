@@ -1,81 +1,46 @@
 package com.spirit.community.login.session;
 
-
-import com.spirit.community.login.common.rpc.constant.ServiceTypeDef;
-import io.netty.channel.ChannelHandlerContext;
+import com.alibaba.fastjson.JSON;
+import com.spirit.community.login.common.rpc.constant.ClientState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class SessionFactory extends Session {
+public class SessionFactory {
 
-    public int add(ChannelHandlerContext ctx, ServiceStatus status) {
+    protected final Map<String, Session> sessionMap;
 
-        log.info("add ctx: {}", ctx);
-
-        if (ServiceTypeDef.SERVICE_TYPE_CONSUMER == status.getType()) {
-
-            consumerSessionMap.put(ctx, status);
-
-            List<ChannelHandlerContext> list = pathChannelHandlerContextListRelationship.get(status.getPath());
-            if (CollectionUtils.isEmpty(list)) {
-                List<ChannelHandlerContext> tmp = new LinkedList<>();
-                tmp.add(ctx);
-                pathChannelHandlerContextListRelationship.put(status.getPath(), tmp);
-            }
-            else {
-                if (!list.contains(ctx)) {
-                    list.add(ctx);
-                }
-            }
-        }
-        else if (ServiceTypeDef.SERVICE_TYPE_PROVIDER == status.getType()) {
-            providerSessionMap.put(ctx, status);
-        }
-
-        return 0;
+    public SessionFactory() {
+        sessionMap = new ConcurrentHashMap<>();
     }
 
-    public List<ChannelHandlerContext> context(String path) {
-        return pathChannelHandlerContextListRelationship.get(path);
+    public void add(Session session) {
+        log.info("add session: {}", JSON.toJSONString(session, true));
+        sessionMap.put(session.getId(), session);
     }
 
-    public String remove(ChannelHandlerContext ctx) {
+    public Session get(String channelId) {
+        return sessionMap.get(channelId);
+    }
 
-        log.info("remove ctx: {}", ctx);
+    public void update(Session session) {
+        log.info("update session: {}", JSON.toJSONString(session, true));
+        sessionMap.put(session.getId(), session);
+    }
 
-        boolean phit = false;
-        boolean chit = false;
+    public Session remove(String channelId) {
+        return sessionMap.remove(channelId);
+    }
 
-        try {
-            if (providerSessionMap.containsKey(ctx)) {
-                phit = true;
-                ServiceStatus status = providerSessionMap.get(ctx);
-                return status.getPath();
-            }
-            else if (consumerSessionMap.containsKey(ctx)) {
-                chit = true;
-                ServiceStatus status = consumerSessionMap.get(ctx);
-                List<ChannelHandlerContext> list = pathChannelHandlerContextListRelationship.get(status.getPath());
-                if (list.contains(ctx)) {
-                    list.remove(ctx);
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getLocalizedMessage(), e);
-        } finally {
-            if (phit) {
-                providerSessionMap.remove(ctx);
-            }
-            if (chit) {
-                consumerSessionMap.remove(ctx);
-            }
+    public void authorized(String id) {
+        if (sessionMap.containsKey(id)) {
+            Session sess = sessionMap.get(id);
+            sess.setState(ClientState.CONNECT_AUTHORIZED);
+            sessionMap.put(id, sess);
         }
-        return null;
     }
 }
 

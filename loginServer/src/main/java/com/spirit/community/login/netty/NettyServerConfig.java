@@ -4,6 +4,7 @@ package com.spirit.community.login.netty;
 import com.spirit.community.login.biz.MainStageServerChannelHandler;
 import com.spirit.community.login.biz.TbaProtocolDecoder;
 import com.spirit.community.login.biz.TbaProtocolEncoder;
+import com.spirit.community.login.session.SessionFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -13,6 +14,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
@@ -28,6 +30,12 @@ public class NettyServerConfig {
 
     @Resource
     private MainStageServerChannelHandler serverChannelHandler;
+
+    @Autowired
+    private TbaProtocolDecoder tbaProtocolDecoder;
+
+    @Autowired
+    private TbaProtocolEncoder tbaProtocolEncoder;
 
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workGroup = new NioEventLoopGroup();

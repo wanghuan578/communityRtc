@@ -1,19 +1,30 @@
 package com.spirit.community.login.session;
 
+import com.spirit.community.login.common.rpc.constant.ClientState;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.Data;
 
+@Data
 public class Session {
 
-    protected final Map<ChannelHandlerContext, ServiceStatus> providerSessionMap;
-    protected final Map<ChannelHandlerContext, ServiceStatus> consumerSessionMap;
-    protected final Map<String, List<ChannelHandlerContext>> pathChannelHandlerContextListRelationship;
+    private String id;
+    private Long connectTime;
+    private Long serverRandom;
+    private int state;
+    private Channel channel = null;
+    private Long lastCommunicateTimeStamp = 0l;
 
-    public Session() {
-        providerSessionMap = new ConcurrentHashMap<>();
-        consumerSessionMap = new ConcurrentHashMap<>();
-        pathChannelHandlerContextListRelationship = new ConcurrentHashMap<>();
+    public Session(String id) {
+        this.id = id;
     }
+
+    public Session(ChannelHandlerContext ctx, Long serverRnd) {
+        id = ctx.channel().id().asLongText();
+        connectTime = System.currentTimeMillis();
+        serverRandom = serverRnd;
+        state = ClientState.CONNECT_UNAUTHORIZED;
+        channel = ctx.channel();
+    }
+
 }

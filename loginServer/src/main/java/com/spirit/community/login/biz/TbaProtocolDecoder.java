@@ -1,6 +1,9 @@
 package com.spirit.community.login.biz;
 
 import java.util.List;
+import com.spirit.community.login.context.ApplicationContextUtils;
+import com.spirit.community.login.session.Session;
+import com.spirit.community.login.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
 import com.spirit.tba.Exception.TbaException;
@@ -9,11 +12,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
-
-
-
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
     @Override
@@ -34,9 +36,11 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                     encrypt[i] = in.readByte();
                 }
 
-                String key = "123";
-                //String original = TbaAes.decrypt(new String(encrypt, "utf-8"), "123");
-                String original = TbaAes.decode(new String(encrypt, "utf-8"), key);
+                SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+                Session session = factory.get(ctx.channel().id().asLongText());
+                String serverRandom = String.valueOf(session.getServerRandom());
+                log.info("decrypt key: {}", serverRandom);
+                String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
                 byte[] msg00 = original.getBytes("ISO8859-1");
                 msg = new TsRpcByteBuffer(msg00, msg00.length);
             }
@@ -52,7 +56,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             TsRpcEventParser parser = new TsRpcEventParser(msg);
             TsRpcHead header = parser.Head();
 
-            log.info("Msg Type: {}", header.GetType());
+            log.info("msg receive type: {}", header.GetType());
 
             try {
                 switch (header.GetType()) {
