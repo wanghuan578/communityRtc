@@ -1,10 +1,9 @@
 package com.spirit.community.login.netty;
 
 
-import com.spirit.community.login.biz.MainStageServerChannelHandler;
+import com.spirit.community.login.biz.ServerEventHandler;
 import com.spirit.community.login.biz.TbaProtocolDecoder;
 import com.spirit.community.login.biz.TbaProtocolEncoder;
-import com.spirit.community.login.session.SessionFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -29,7 +28,7 @@ public class NettyServerConfig {
     private  Integer port;
 
     @Resource
-    private MainStageServerChannelHandler serverChannelHandler;
+    private ServerEventHandler serverChannelHandler;
 
     @Autowired
     private TbaProtocolDecoder tbaProtocolDecoder;

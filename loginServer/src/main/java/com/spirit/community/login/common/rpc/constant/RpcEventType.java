@@ -1,4 +1,4 @@
-package com.spirit.community.login.biz;
+package com.spirit.community.login.common.rpc.constant;
 
 public class RpcEventType {
     public final static int MT_HELLO_REQ                                                = 100;

@@ -1,6 +1,7 @@
 package com.spirit.community.login.biz;
 
 import com.alibaba.fastjson.JSON;
+import com.spirit.community.login.common.rpc.constant.RpcEventType;
 import com.spirit.community.login.session.Session;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.common.IceServer;
@@ -28,7 +29,7 @@ import static com.spirit.community.login.common.exception.ExceptionCode.*;
 @Slf4j
 @Component
 @Sharable
-public class MainStageServerChannelHandler extends ChannelInboundHandlerAdapter {
+public class ServerEventHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private UserInfoService userInfoService;
