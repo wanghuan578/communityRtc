@@ -2,9 +2,9 @@ package com.spirit.community.login.biz;
 
 import java.util.List;
 
-import com.spirit.community.login.common.rpc.constant.Encrypt;
-import com.spirit.community.login.common.rpc.constant.RpcEventType;
-import com.spirit.community.login.context.ApplicationContextUtils;
+import com.spirit.community.common.constant.Encrypt;
+import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.utils.context.ApplicationContextUtils;
 import com.spirit.community.login.session.Session;
 import com.spirit.community.login.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;

@@ -14,6 +14,8 @@
 		<module>login-server</module>
 		<module>room-gate</module>
 		<module>room-server</module>
+		<module>protocol</module>
+		<module>common</module>
 	</modules>
 
 	<properties>
@@ -27,7 +29,6 @@
 		<spring-data.version>3.1.0.RELEASE</spring-data.version>
 		<spring-sleuth.version>2.0.1.RELEASE</spring-sleuth.version>
 		<alibaba-ons-client.version>1.7.8.Final</alibaba-ons-client.version>
-		<!--<alibaba-druid-spring-boot-starter.version>1.1.10</alibaba-druid-spring-boot-starter.version> -->
 		<alibaba-fastjson.version>1.2.58</alibaba-fastjson.version>
 		<aliyun-sdk-oss.version>3.3.0</aliyun-sdk-oss.version>
 		<lombok.version>1.18.6</lombok.version>
@@ -39,11 +40,28 @@
 		<commons-lang3.version>3.9</commons-lang3.version>
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 		<rabbitmq.version>2.1.6.RELEASE</rabbitmq.version>
-
+		<thrift.version>0.10.0</thrift.version>
+		<netty.version>4.1.38.Final</netty.version>
+		<libtba.version>1.0-SNAPSHOT</libtba.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.apache.thrift</groupId>
+				<artifactId>libthrift</artifactId>
+				<version>${thrift.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.spirit</groupId>
+				<artifactId>libtba</artifactId>
+				<version>${libtba.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
@@ -81,7 +99,6 @@
 				<version>${mysql-connector-java.version}</version>
 			</dependency>
 
-			<!-- Apache commons。 -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
@@ -138,31 +155,8 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.3</version>
-				<configuration>
-					<!--指定生成.exec文件的存放位置-->
-					<destFile>${sonar.jacoco.reportPath}</destFile>
-					<!--Jacoco是根据.exec文件生成最终的报告，所以需指定.exec的存放路径-->
-					<dataFile>${sonar.jacoco.reportPath}</dataFile>
-					<append>true</append>
-				</configuration>
-				<executions>
-					<execution>
-						<id>jacoco-initialize</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-site</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

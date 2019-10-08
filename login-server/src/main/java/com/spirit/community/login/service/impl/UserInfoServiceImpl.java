@@ -1,6 +1,6 @@
 package com.spirit.community.login.service.impl;
 
-import com.spirit.community.login.common.exception.MainStageException;
+import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.login.service.UserInfoService;
 import com.spirit.community.login.service.dao.entity.UserInfo;
 import com.spirit.community.login.service.dao.repository.UserInfoRepository;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static com.spirit.community.login.common.exception.ExceptionCode.USERID_OR_PASSWD_INVALID;
-import static com.spirit.community.login.common.exception.ExceptionCode.USERINFO_NOT_EXIST;
+import static com.spirit.community.common.exception.ExceptionCode.USERID_OR_PASSWD_INVALID;
+import static com.spirit.community.common.exception.ExceptionCode.USERINFO_NOT_EXIST;
 
 @Component
 public class UserInfoServiceImpl implements UserInfoService {

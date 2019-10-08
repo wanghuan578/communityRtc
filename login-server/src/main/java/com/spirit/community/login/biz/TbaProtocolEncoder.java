@@ -1,6 +1,6 @@
 package com.spirit.community.login.biz;
 
-import com.spirit.community.login.context.ApplicationContextUtils;
+import com.spirit.community.common.utils.context.ApplicationContextUtils;
 import com.spirit.community.login.session.Session;
 import com.spirit.community.login.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;

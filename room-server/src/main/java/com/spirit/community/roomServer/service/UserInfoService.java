@@ -1,6 +1,7 @@
 package com.spirit.community.roomServer.service;
 
-import com.spirit.community.roomServer.common.exception.MainStageException;
+
+import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.roomServer.service.dao.entity.UserInfo;
 
 public interface UserInfoService {

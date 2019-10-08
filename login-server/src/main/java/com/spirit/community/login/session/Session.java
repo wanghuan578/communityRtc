@@ -1,6 +1,6 @@
 package com.spirit.community.login.session;
 
-import com.spirit.community.login.common.rpc.constant.ClientState;
+import com.spirit.community.common.constant.ClientState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.Data;

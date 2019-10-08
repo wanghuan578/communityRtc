@@ -2,9 +2,9 @@ package com.spirit.community.roomServer.biz;
 
 import java.util.List;
 
-import com.spirit.community.roomServer.common.rpc.constant.Encrypt;
-import com.spirit.community.roomServer.common.rpc.constant.RpcEventType;
-import com.spirit.community.roomServer.context.ApplicationContextUtils;
+import com.spirit.community.common.constant.Encrypt;
+import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.utils.context.ApplicationContextUtils;
 import com.spirit.community.roomServer.session.Session;
 import com.spirit.community.roomServer.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;

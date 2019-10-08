@@ -1,7 +1,7 @@
 package com.spirit.community.roomgate.session;
 
 import com.alibaba.fastjson.JSON;
-import com.spirit.community.roomgate.common.rpc.constant.ClientState;
+import com.spirit.community.common.constant.ClientState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.util.Map;

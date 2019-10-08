@@ -1,6 +1,6 @@
 package com.spirit.community.login.service;
 
-import com.spirit.community.login.common.exception.MainStageException;
+import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.login.service.dao.entity.UserInfo;
 
 public interface UserInfoService {

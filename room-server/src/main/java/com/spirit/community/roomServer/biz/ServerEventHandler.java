@@ -1,13 +1,13 @@
 package com.spirit.community.roomServer.biz;
 
 import com.alibaba.fastjson.JSON;
-import com.spirit.community.roomServer.common.rpc.constant.RpcEventType;
+import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.roomServer.session.Session;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.common.IceServer;
 import com.spirit.community.protocol.thrift.common.SessionTicket;
 import com.spirit.community.protocol.thrift.login.*;
-import com.spirit.community.roomServer.common.exception.MainStageException;
 import com.spirit.community.roomServer.service.UserInfoService;
 import com.spirit.community.roomServer.service.dao.entity.UserInfo;
 import com.spirit.community.roomServer.session.SessionFactory;
@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
-import static com.spirit.community.roomServer.common.exception.ExceptionCode.*;
 
+import static com.spirit.community.common.exception.ExceptionCode.*;
 
 @Slf4j
 @Component

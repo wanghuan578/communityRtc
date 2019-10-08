@@ -1,6 +1,7 @@
 package com.spirit.community.roomgate.biz;
 
-import com.spirit.community.roomgate.context.ApplicationContextUtils;
+
+import com.spirit.community.common.utils.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;

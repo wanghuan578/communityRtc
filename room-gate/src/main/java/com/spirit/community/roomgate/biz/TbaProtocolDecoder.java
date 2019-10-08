@@ -2,13 +2,13 @@ package com.spirit.community.roomgate.biz;
 
 import java.util.List;
 
-import com.spirit.community.roomgate.common.rpc.constant.Encrypt;
-import com.spirit.community.roomgate.common.rpc.constant.RpcEventType;
-import com.spirit.community.roomgate.context.ApplicationContextUtils;
-import com.spirit.community.roomgate.session.Session;
-import com.spirit.community.roomgate.session.SessionFactory;
+import com.spirit.community.common.constant.Encrypt;
+import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.utils.context.ApplicationContextUtils;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
+import com.spirit.community.roomgate.session.Session;
+import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
