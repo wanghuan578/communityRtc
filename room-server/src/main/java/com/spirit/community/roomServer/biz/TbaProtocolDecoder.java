@@ -4,11 +4,12 @@ import java.util.List;
 
 import com.spirit.community.common.constant.Encrypt;
 import com.spirit.community.common.constant.RpcEventType;
-import com.spirit.community.common.utils.context.ApplicationContextUtils;
+import com.spirit.community.roomServer.context.ApplicationContextUtils;
 import com.spirit.community.roomServer.session.Session;
 import com.spirit.community.roomServer.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
+
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
@@ -62,23 +63,14 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             log.info("msg receive type: {}", header.GetType());
 
             try {
-                switch (header.GetType()) {
 
-                    case RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ: {
-                        TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);
-                        out.add(protocol.Decode(ClientPasswordLoginReq.class));
-                    }
-                        break;
-
-                    case RpcEventType.MT_CLIENT_REGISTER_REQ: {
-                        TsRpcProtocolFactory<UserRegisterReq> protocol = new TsRpcProtocolFactory<UserRegisterReq>(msg);
-                        out.add(protocol.Decode(UserRegisterReq.class));
-                    }
-                    break;
-
-
-                    default:
-                        break;
+                if (header.GetType() == RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ) {
+                    TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);
+                    out.add(protocol.Decode(ClientPasswordLoginReq.class));
+                }
+                else if (header.GetType() == RpcEventType.MT_CLIENT_REGISTER_REQ) {
+                    TsRpcProtocolFactory<UserRegisterReq> protocol = new TsRpcProtocolFactory<UserRegisterReq>(msg);
+                    out.add(protocol.Decode(UserRegisterReq.class));
                 }
             }
             catch(TbaException e){
