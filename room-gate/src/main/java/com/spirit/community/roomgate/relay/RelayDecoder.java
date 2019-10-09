@@ -1,13 +1,9 @@
-package com.spirit.community.roomgate.biz;
+package com.spirit.community.roomgate.relay;
 
-import java.util.List;
 import com.spirit.community.common.constant.Encrypt;
 import com.spirit.community.common.constant.RpcEventType;
-import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
-import com.spirit.community.roomgate.redis.RedisUtil;
-import com.spirit.community.roomgate.relay.RelayManager;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -17,9 +13,24 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 
 @Slf4j
-public class TbaProtocolDecoder extends ByteToMessageDecoder {
+public class RelayDecoder extends ByteToMessageDecoder {
+
+    private String serverId;
+
+    public RelayDecoder(String serverId) {
+        this.serverId = serverId;
+    }
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -68,10 +79,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                     out.add(protocol.Decode(ConnectReq.class));
                 }
                 else {
-                    int uid = header.GetDestination();
 
-                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-                    relayManager.relayMessage((long)uid, relay);
                 }
             }
             catch(TbaException e){

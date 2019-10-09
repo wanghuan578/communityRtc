@@ -30,12 +30,6 @@ public class NettyServerConfig {
     @Resource
     private ServerEventHandler serverChannelHandler;
 
-    @Autowired
-    private TbaProtocolDecoder tbaProtocolDecoder;
-
-    @Autowired
-    private TbaProtocolEncoder tbaProtocolEncoder;
-
     private EventLoopGroup bossGroup = new NioEventLoopGroup();
     private EventLoopGroup workGroup = new NioEventLoopGroup();
 

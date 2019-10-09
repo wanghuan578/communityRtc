@@ -8,19 +8,28 @@ import lombok.Data;
 @Data
 public class Session {
 
-    private String id;
+    private String channelId;
     private Long connectTime;
     private Long serverRandom;
     private int state;
     private Channel channel = null;
     private Long lastCommunicateTimeStamp = 0l;
+    private Long uid;
 
-    public Session(String id) {
-        this.id = id;
+    public Session(String ChannelId) {
+        this.channelId = ChannelId;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
     }
 
     public Session(ChannelHandlerContext ctx, Long serverRnd) {
-        id = ctx.channel().id().asLongText();
+        channelId = ctx.channel().id().asLongText();
         connectTime = System.currentTimeMillis();
         serverRandom = serverRnd;
         state = ClientState.CONNECT_UNAUTHORIZED;

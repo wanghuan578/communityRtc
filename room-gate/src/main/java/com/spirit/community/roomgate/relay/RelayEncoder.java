@@ -1,11 +1,10 @@
-package com.spirit.community.roomgate.biz;
+package com.spirit.community.roomgate.relay;
 
 
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
-import com.spirit.tba.client.TbaRelayEvent;
 import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,18 +13,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TBase;
 
 @Slf4j
-public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
+public class RelayEncoder extends MessageToByteEncoder<Object> {
+
+	private String serverId;
+
+	public RelayEncoder(String serverId) {
+		this.serverId = serverId;
+	}
+
+	public String getServerId() {
+		return serverId;
+	}
+
+	public void setServerId(String serverId) {
+		this.serverId = serverId;
+	}
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-
-		if (msg instanceof TbaRelayEvent) {
-			TbaRelayEvent ev = (TbaRelayEvent) msg;
-			byte[] relay = ev.getRelayMsg();
-			log.info("relay msg len: {}", relay.length);
-			out.writeBytes(relay, 0, relay.length);
-			return;
-		}
 
 		TbaEvent ev = (TbaEvent) msg;
 
@@ -47,14 +52,14 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				byteBuff.WriteI16((short)1);
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
-				//log.info("encrypt out buff len: {}", o.length);
+				log.info("encrypt out buff len: {}", o.length);
 				out.writeBytes(o, 0, o.length);
 			}
 			else {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
 				byte[] buf = protocol.Encode().OutStream().GetBytes();
-				//log.info("out buff len: {}", buf.length);
+				log.info("out buff len: {}", buf.length);
 				out.writeBytes(buf, 0, buf.length);
 			}
 		}

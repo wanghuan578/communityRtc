@@ -2,14 +2,14 @@ package com.spirit.community.roomgate.biz;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.common.constant.RpcEventType;
-import com.spirit.community.common.exception.MainStageException;
+import com.spirit.community.common.pojo.RoomgateUser;
+import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
-import com.spirit.community.protocol.thrift.common.IceServer;
-import com.spirit.community.protocol.thrift.common.SessionTicket;
-import com.spirit.community.protocol.thrift.login.*;
+import com.spirit.community.protocol.thrift.roomgate.ConnectChecksum;
+import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
+import com.spirit.community.roomgate.redis.RedisUtil;
+import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
-import com.spirit.community.roomgate.service.UserInfoService;
-import com.spirit.community.roomgate.service.dao.entity.UserInfo;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
@@ -18,7 +18,6 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
@@ -28,16 +27,18 @@ import static com.spirit.community.common.exception.ExceptionCode.*;
 
 
 @Slf4j
-@Component
 @Sharable
+@Component
 public class ServerEventHandler extends ChannelInboundHandlerAdapter {
-
-    @Autowired
-    private UserInfoService userInfoService;
 
     @Autowired
     private SessionFactory sessionFactory;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Autowired
+    private RoomGateInfoService roomGateInfoService;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -56,6 +57,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
         ctx.flush();
 
         Session session = new Session(ctx, serverRandom);
+
         sessionFactory.addSession(session);
     }
 
@@ -67,97 +69,44 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-        if (msg instanceof ClientPasswordLoginReq) {
+        if (msg instanceof ConnectReq) {
 
-            ClientPasswordLoginReq entity = (ClientPasswordLoginReq) msg;
-            log.info("ClientPasswordLoginReq: {}", JSON.toJSONString(entity, true));
+            ConnectReq entity = (ConnectReq) msg;
+            log.info("ConnectReq: {}", JSON.toJSONString(entity, true));
 
-            ClientLoginRes res = new ClientLoginRes();
+            CommonRes res = new CommonRes();
+
             try {
-                ClientPasswordLoginReqChecksum checksum = new TbaToolsKit<ClientPasswordLoginReqChecksum>().deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
-                log.info("ClientPasswordLoginReqChecksum: {}", JSON.toJSONString(checksum, true));
+                ConnectChecksum checksum = new TbaToolsKit<ConnectChecksum>().deserialize(entity.getChecksum().getBytes("ISO8859-1"), ConnectChecksum.class);
+                log.info("ConnectChecksum: {}", JSON.toJSONString(checksum, true));
 
-                Session session = sessionFactory.getSessionById(ctx.channel().id().asLongText());
+                Session session = sessionFactory.getSessionByChannelId(ctx.channel().id().asLongText());
                 if (session.getServerRandom() != checksum.getServer_random()) {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
-                    TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
-                    ctx.write(new TbaEvent(head, res, 1024, true));
+                    TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
+                    ctx.write(new TbaEvent(head, res, 128, true));
                     ctx.flush();
                     return;
                 }
 
-                userInfoService.identity(entity.user_id, checksum.password);
+                sessionFactory.authorized(ctx.channel().id().asLongText(), checksum.getUser_id());
 
-                sessionFactory.authorized(ctx.channel().id().asLongText());
+                RoomgateUser user = new RoomgateUser();
+                user.setUid(checksum.getUser_id());
+                user.setRoomGateInfo(roomGateInfoService.getRoomGateInfo());
+                redisUtil.set(String.valueOf(checksum.getUser_id()), user);
 
                 res.error_code = Short.valueOf(SUCCESS.code());
                 res.error_text = SUCCESS.text();
-
-                SessionTicket ticket = new SessionTicket();
-                ticket.signal_server = "https://47.100.251.132";
-                IceServer iceServer = new IceServer();
-                iceServer.url = "turn:coturn.86bba.com:3478";
-                iceServer.user = "spirit";
-                iceServer.passwd = "spirit";
-                ticket.ice_server = iceServer;
-
-                byte[] sessionTicket = new TbaToolsKit<SessionTicket>().serialize(ticket, 256);
-                res.session_ticket = new String(sessionTicket, "ISO8859-1");
             } catch (IllegalAccessException | InstantiationException | UnsupportedEncodingException | TbaException e) {
                 log.error(e.getLocalizedMessage(), e);
                 res.error_code = Short.valueOf(UNEXPECTED_EXCEPTION.code());
                 res.error_text = UNEXPECTED_EXCEPTION.text();
-            } catch (MainStageException e) {
-                log.error("MainStageException", e);
-                if (USERINFO_NOT_EXIST == e.getResultType()) {
-                    res.error_code = Short.valueOf(USERINFO_NOT_EXIST.code());
-                    res.error_text = USERINFO_NOT_EXIST.text();
-                }
-                if (USERID_OR_PASSWD_INVALID == e.getResultType()) {
-                    res.error_code = Short.valueOf(USERID_OR_PASSWD_INVALID.code());
-                    res.error_text = USERID_OR_PASSWD_INVALID.text();
-                }
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
-            ctx.write(new TbaEvent(head, res, 1024, true));
-            ctx.flush();
-        }
-        if (msg instanceof UserRegisterReq) {
-
-            UserRegisterReq entity = (UserRegisterReq) msg;
-            log.info("UserRegisterReq: {}", JSON.toJSONString(entity, true));
-
-            UserInfo info = new UserInfo();
-            info.setUserName(entity.getUser_name());
-            info.setNickName(entity.getNick_name());
-            info.setPassword(entity.getPassword());
-            info.setGender(entity.getGender());
-            info.setInvitationCode(entity.invitation_code);
-            info.setIdentificationCardId(entity.identity_card);
-
-            UserRegisterRes res = new UserRegisterRes();
-
-            if (!StringUtils.equalsIgnoreCase(entity.invitation_code, "sxkj") && !StringUtils.equalsIgnoreCase(entity.invitation_code, "guest")) {
-                res.error_code = Short.valueOf(INVITE_CODE_INVALID.code());
-                res.error_text = INVITE_CODE_INVALID.text();
-            }
-            else {
-                try {
-                    UserInfo s = userInfoService.register(info);
-                    res.error_code = 0;
-                    res.error_text = "OK";
-                    res.user_id =   String.valueOf(s.getUserId());
-                }
-                catch (Exception e) {
-                    res.error_code = Short.valueOf(UNEXPECTED_EXCEPTION.code());
-                    res.error_text = UNEXPECTED_EXCEPTION.text();
-                }
-            }
-
-            TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_REGISTER_RES);
-            ctx.write(new TbaEvent(head, res, 1024, false));
+            TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
+            ctx.write(new TbaEvent(head, res, 128, true));
             ctx.flush();
         }
 

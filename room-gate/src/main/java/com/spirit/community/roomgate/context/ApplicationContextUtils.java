@@ -1,4 +1,4 @@
-package com.spirit.community.common.utils.context;
+package com.spirit.community.roomgate.context;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;

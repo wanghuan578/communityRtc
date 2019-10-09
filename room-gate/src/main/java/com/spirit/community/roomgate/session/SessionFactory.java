@@ -19,27 +19,37 @@ public class SessionFactory {
 
     public void addSession(Session session) {
         log.info("add session: {}", JSON.toJSONString(session, true));
-        sessionMap.put(session.getId(), session);
+        sessionMap.put(session.getChannelId(), session);
     }
 
-    public Session getSessionById(String channelId) {
+    public Session getSessionByChannelId(String channelId) {
         return sessionMap.get(channelId);
+    }
+
+    public Session getSessionByUid(Long uid) {//todo data syncrinize
+        for (Session sess : sessionMap.values()) {
+            if (sess.getUid() == uid) {
+                return sess;
+            }
+        }
+        return null;
     }
 
     public void update(Session session) {
         log.info("update session: {}", JSON.toJSONString(session, true));
-        sessionMap.put(session.getId(), session);
+        sessionMap.put(session.getChannelId(), session);
     }
 
     public Session removeById(String channelId) {
         return sessionMap.remove(channelId);
     }
 
-    public void authorized(String id) {
-        if (sessionMap.containsKey(id)) {
-            Session sess = sessionMap.get(id);
+    public void authorized(String channelId, Long uid) {
+        if (sessionMap.containsKey(channelId)) {
+            Session sess = sessionMap.get(channelId);
             sess.setState(ClientState.CONNECT_AUTHORIZED);
-            sessionMap.put(id, sess);
+            sess.setUid(uid);
+            sessionMap.put(channelId, sess);
         }
     }
 }
