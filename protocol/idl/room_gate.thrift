@@ -10,14 +10,45 @@ enum MessageType
     MT_UPDATE_ROOMLIST_NOTIFY,
 	UPDATE_USERINFO_REQ,
     UPDATE_USERINFO_RES,
+    MT_CHAT_REQ,
+    MT_CHAT_RES,
+    MT_CHAT_NOTIFY,
+}
+
+enum ChatType
+{
+    PRIVATE_CHAT = 0,                           //私聊
+    PUBLIC_CHAT = 1,                            //第1位: 0私聊      1公聊
+    AUTO_REPLY  = 2,                            //第2位: 0手工输入  1自动回复
+    USER_MOOD = 4,                              //第3位: 0普通      1用户心情
+    POKE = 8,                                   //第4位: 0普通      1动一下表情
+    SHAKE_WINDOW = 16,                          //第5位: 0普通      1震动窗口
+}
+
+struct FontInfo
+{
+    1:string        name,                       //名称
+    2:i16           size,                       //大小
+    3:bool          bold,                       //是否加粗
+    4:bool          italic,                     //是否倾斜
+    5:bool          underline,                  //是否加下划线
+    6:bool          strikeout,                  //是否加删除线
+    7:i32           color,                      //颜色值
+}
+
+struct ChatReq
+{
+    1:string        from_nick_name,             //发送用户呢称
+    2:string        to_nick_name,               //接收用户呢称
+    3:i32           chat_type,                  //聊天类型 关联enum ChatType
+    4:string        chat_text,                  //聊天文本
+    5:i64           chat_time,                  //聊天时间
 }
 
 struct ConnectReq
 {
     1:string       sessoin_ticket,
-    2:i64          client_random,
-    3:i64          server_random,
-    4:string       checksum,
+    2:string       checksum,
 }
 
 struct ConnectChecksum
