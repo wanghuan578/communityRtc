@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
+    private static final int ENCRYPT_PROTOCOL_OFFSET = 6;
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         // TODO Auto-generated method stub
@@ -35,8 +37,8 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
             if(flag == Encrypt.TYPE_ENABLE) {
 
-                byte[] encrypt = new byte[msg_len - 6];
-                for (int i = 0; i < msg_len - 6; i++) {
+                byte[] encrypt = new byte[msg_len - ENCRYPT_PROTOCOL_OFFSET];
+                for (int i = 0; i < msg_len - ENCRYPT_PROTOCOL_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 

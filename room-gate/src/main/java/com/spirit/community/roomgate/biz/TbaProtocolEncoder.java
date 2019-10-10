@@ -43,7 +43,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 
 				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 6);
 
-				byteBuff.WriteI32(encrypt.length() + 4);
+				byteBuff.WriteI32(encrypt.length() + 6);
 				byteBuff.WriteI16((short)1);
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
