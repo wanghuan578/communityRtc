@@ -109,6 +109,9 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             ctx.write(new TbaEvent(head, res, 128, true));
             ctx.flush();
         }
+        else if (msg instanceof ConnectReq) {
+
+        }
 
 
 

@@ -35,8 +35,8 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
             if(flag == Encrypt.TYPE_ENABLE) {
 
-                byte[] encrypt = new byte[msg_len - 4];
-                for (int i = 0; i < msg_len - 4; i++) {
+                byte[] encrypt = new byte[msg_len - 6];
+                for (int i = 0; i < msg_len - 6; i++) {
                     encrypt[i] = in.readByte();
                 }
 

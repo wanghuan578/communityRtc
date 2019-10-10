@@ -35,8 +35,8 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
             if(flag == Encrypt.TYPE_ENABLE) {
 
-                byte[] encrypt = new byte[msg_len - 4];
-                for (int i = 0; i < msg_len - 4; i++) {
+                byte[] encrypt = new byte[msg_len - 6];
+                for (int i = 0; i < msg_len - 6; i++) {
                     encrypt[i] = in.readByte();
                 }
 
@@ -67,11 +67,16 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                     TsRpcProtocolFactory<ConnectReq> protocol = new TsRpcProtocolFactory<ConnectReq>(msg);
                     out.add(protocol.Decode(ConnectReq.class));
                 }
-                else {
-                    int uid = header.GetDestination();
+                else if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ){
+
+                    long suid = header.GetAttach1() | header.GetAttach2() << 32;
+                    long duid = header.GetAttach3() | header.GetAttach4() << 32;
 
                     RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-                    relayManager.relayMessage((long)uid, relay);
+                    relayManager.relayMessage((long)suid, relay);
+                }
+                else {
+
                 }
             }
             catch(TbaException e){
