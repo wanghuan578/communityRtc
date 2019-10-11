@@ -53,7 +53,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
         notify.setError_text("OK");
 
         TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
-        ctx.write(new TbaEvent(head, notify, 1024, false));
+        ctx.write(new TbaEvent(head, notify, 1024, EncryptType.DISABLE));
         ctx.flush();
 
         Session session = new Session(ctx, serverRandom);
@@ -85,7 +85,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
                     TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
-                    ctx.write(new TbaEvent(head, res, 128, true));
+                    ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
                     ctx.flush();
                     return;
                 }
@@ -106,7 +106,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             }
 
             TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
-            ctx.write(new TbaEvent(head, res, 128, true));
+            ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
             ctx.flush();
         }
         else if (msg instanceof ConnectReq) {

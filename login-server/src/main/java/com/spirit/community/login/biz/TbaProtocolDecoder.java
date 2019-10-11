@@ -1,15 +1,12 @@
 package com.spirit.community.login.biz;
 
 import java.util.List;
-
-import com.spirit.community.common.constant.Encrypt;
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.login.context.ApplicationContextUtils;
 import com.spirit.community.login.session.Session;
 import com.spirit.community.login.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
-
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
 import io.netty.buffer.ByteBuf;
@@ -33,10 +30,10 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
             TsRpcByteBuffer msg = null;
 
-            if(flag == Encrypt.TYPE_ENABLE) {
+            if(flag == EncryptType.WHOLE) {
 
-                byte[] encrypt = new byte[msg_len - 6];
-                for (int i = 0; i < msg_len - 6; i++) {
+                byte[] encrypt = new byte[msg_len - TbaConstant.MAGIC_WHOLE_OFFSET];
+                for (int i = 0; i < msg_len - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 

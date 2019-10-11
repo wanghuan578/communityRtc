@@ -1,6 +1,5 @@
 package com.spirit.community.roomgate.relay;
 
-import com.spirit.community.common.constant.Encrypt;
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
@@ -12,7 +11,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 
 @Slf4j
@@ -44,7 +42,7 @@ public class RelayDecoder extends ByteToMessageDecoder {
             TsRpcByteBuffer msg = null;
             byte[] relay = null;
 
-            if(flag == Encrypt.TYPE_ENABLE) {
+            if(flag == EncryptType.WHOLE) {
 
                 byte[] encrypt = new byte[msg_len - 4];
                 for (int i = 0; i < msg_len - 4; i++) {

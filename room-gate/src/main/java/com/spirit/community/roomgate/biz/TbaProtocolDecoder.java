@@ -1,27 +1,24 @@
 package com.spirit.community.roomgate.biz;
 
 import java.util.List;
-import com.spirit.community.common.constant.Encrypt;
 import com.spirit.community.common.constant.RpcEventType;
-import com.spirit.community.common.pojo.RoomgateUser;
+import com.spirit.community.protocol.thrift.roomgate.ChatReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
-import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.relay.RelayManager;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
+import com.spirit.tba.tools.TbaHeadUtil;
+import com.spirit.tba.tools.TbaToolsKit;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 public class TbaProtocolDecoder extends ByteToMessageDecoder {
-
-    private static final int ENCRYPT_PROTOCOL_OFFSET = 6;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -35,10 +32,10 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             TsRpcByteBuffer msg = null;
             byte[] relay = null;
 
-            if(flag == Encrypt.TYPE_ENABLE) {
+            if(flag == EncryptType.WHOLE) {
 
-                byte[] encrypt = new byte[msg_len - ENCRYPT_PROTOCOL_OFFSET];
-                for (int i = 0; i < msg_len - ENCRYPT_PROTOCOL_OFFSET; i++) {
+                byte[] encrypt = new byte[msg_len - TbaConstant.MAGIC_WHOLE_OFFSET];
+                for (int i = 0; i < msg_len - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 
@@ -49,6 +46,26 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
                 relay = original.getBytes("ISO8859-1");
                 msg = new TsRpcByteBuffer(relay, relay.length);
+            }
+            else if (flag == EncryptType.BODY) {
+                log.info("encrypt type: {}", flag);
+                byte[] magic = new byte[TbaHeadUtil.SIZE - TbaConstant.MAGIC_WHOLE_OFFSET];
+                for (int i = 0; i < TbaHeadUtil.SIZE - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
+                    magic[i] = in.readByte();
+                }
+                byte[] encrypt = new byte[msg_len - TbaHeadUtil.SIZE];
+                for (int i = 0; i < msg_len - TbaHeadUtil.SIZE; i++) {
+                    encrypt[i] = in.readByte();
+                }
+                SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+                Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
+                String serverRandom = String.valueOf(session.getServerRandom());
+                log.info("decrypt key: {}", serverRandom);
+                String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
+                ChatReq req = new TbaToolsKit<ChatReq>().deserialize(original.getBytes("ISO8859-1"), ChatReq.class);
+                //relay = original.getBytes("ISO8859-1");
+                msg = new TsRpcByteBuffer(relay, relay.length);
+
             }
             else {
                 msg = new TsRpcByteBuffer(msg_len);

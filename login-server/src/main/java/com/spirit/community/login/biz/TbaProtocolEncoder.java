@@ -23,7 +23,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 		TbaEvent ev = (TbaEvent) msg;
 
 		try {
-			if (ev.isEncrypt()) {
+			if (ev.getEncryptType() == EncryptType.WHOLE) {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
 				byte[] buf = protocol.Encode().OutStream().GetBytes();
@@ -34,10 +34,10 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				log.info("encrypt key: {}", key);
 				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);
 
-				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 6);
+				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + TbaConstant.MAGIC_WHOLE_OFFSET);
 
-				byteBuff.WriteI32(encrypt.length() + 4);
-				byteBuff.WriteI16((short)1);
+				byteBuff.WriteI32(encrypt.length() + TbaConstant.MAGIC_WHOLE_OFFSET);
+				byteBuff.WriteI16(ev.getEncryptType());
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
 				log.info("encrypt out buff len: {}", o.length);
