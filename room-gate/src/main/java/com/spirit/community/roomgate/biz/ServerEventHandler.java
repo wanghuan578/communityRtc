@@ -5,9 +5,11 @@ import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
+import com.spirit.community.protocol.thrift.roomgate.ChatReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectChecksum;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.redis.RedisUtil;
+import com.spirit.community.roomgate.relay.RelayProxy;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
@@ -109,8 +111,26 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
             ctx.flush();
         }
-        else if (msg instanceof ConnectReq) {
+        else if (msg instanceof RelayProxy) {
+            RelayProxy proxy = (RelayProxy) msg;
+            TsRpcHead header = proxy.head;
 
+            long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
+            long destUid = header.GetAttach3() | header.GetAttach4() << 32;
+
+            RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(srcUid));
+
+            if (user != null) {
+                String rid = user.getRoomGateInfo().getRoomGateId();
+                String localRid = roomGateInfoService.getRoomGateInfo().getRoomGateId();
+                if (user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
+                    Session session = sessionFactory.getSessionByUid(srcUid);
+                    if (session != null) {
+                        header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
+                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                    }
+                }
+            }
         }
 
 

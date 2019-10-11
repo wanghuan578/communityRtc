@@ -32,8 +32,8 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
             if(flag == EncryptType.WHOLE) {
 
-                byte[] encrypt = new byte[msg_len - TbaConstant.MAGIC_WHOLE_OFFSET];
-                for (int i = 0; i < msg_len - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
+                byte[] encrypt = new byte[msg_len - TsHeadMagic.MAGIC_OFFSET];
+                for (int i = 0; i < msg_len - TsHeadMagic.MAGIC_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 

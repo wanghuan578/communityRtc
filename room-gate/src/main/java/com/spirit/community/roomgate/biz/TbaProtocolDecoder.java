@@ -6,6 +6,7 @@ import com.spirit.community.protocol.thrift.roomgate.ChatReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.relay.RelayManager;
+import com.spirit.community.roomgate.relay.RelayProxy;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -26,16 +27,23 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
         while (in.readableBytes() > 4) {
 
-            int msg_len = in.readInt();
-            short flag = in.readShort();
+            byte [] magic = new byte[TsMagic.MAGIC_OFFSET];
+            for (int i = 0; i < TsMagic.MAGIC_OFFSET; i++) {
+                magic[i] = in.readByte();
+            }
+            TsMagic magicHead = TbaHeadUtil.preParser(magic);
+
+            int msg_len = magicHead.getLength();
+            short flag = magicHead.getFlag();
 
             TsRpcByteBuffer msg = null;
             byte[] relay = null;
+            TsRpcHead header = null;
 
             if(flag == EncryptType.WHOLE) {
 
-                byte[] encrypt = new byte[msg_len - TbaConstant.MAGIC_WHOLE_OFFSET];
-                for (int i = 0; i < msg_len - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
+                byte[] encrypt = new byte[msg_len - TsMagic.MAGIC_OFFSET];
+                for (int i = 0; i < msg_len - TsMagic.MAGIC_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 
@@ -46,26 +54,46 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
                 relay = original.getBytes("ISO8859-1");
                 msg = new TsRpcByteBuffer(relay, relay.length);
+
+                TsRpcEventParser parser = new TsRpcEventParser(msg);
+                header = parser.Head();
             }
             else if (flag == EncryptType.BODY) {
                 log.info("encrypt type: {}", flag);
-                byte[] magic = new byte[TbaHeadUtil.SIZE - TbaConstant.MAGIC_WHOLE_OFFSET];
-                for (int i = 0; i < TbaHeadUtil.SIZE - TbaConstant.MAGIC_WHOLE_OFFSET; i++) {
-                    magic[i] = in.readByte();
+                byte[] all = new byte[TbaHeadUtil.HEAD_SIZE];
+                System.arraycopy(magic, 0 , all, 0, TsMagic.MAGIC_OFFSET);
+                for (int i = TsMagic.MAGIC_OFFSET; i < TbaHeadUtil.HEAD_SIZE; i++) {
+                    all[i] = in.readByte();
                 }
-                byte[] encrypt = new byte[msg_len - TbaHeadUtil.SIZE];
-                for (int i = 0; i < msg_len - TbaHeadUtil.SIZE; i++) {
-                    encrypt[i] = in.readByte();
-                }
-                SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-                Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
-                String serverRandom = String.valueOf(session.getServerRandom());
-                log.info("decrypt key: {}", serverRandom);
-                String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
-                ChatReq req = new TbaToolsKit<ChatReq>().deserialize(original.getBytes("ISO8859-1"), ChatReq.class);
-                //relay = original.getBytes("ISO8859-1");
-                msg = new TsRpcByteBuffer(relay, relay.length);
 
+                header = TbaHeadUtil.parser(all);
+
+                if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ) {
+
+//                    long suid = header.GetAttach1() | header.GetAttach2() << 32;
+//                    long duid = header.GetAttach3() | header.GetAttach4() << 32;
+//                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
+//                    relayManager.relayMessage((long)suid, relay);
+
+                    byte[] encryptData = new byte[msg_len - TbaHeadUtil.HEAD_SIZE];
+                    for (int i = 0; i < msg_len - TbaHeadUtil.HEAD_SIZE; i++) {
+                        encryptData[i] = in.readByte();
+                    }
+
+                    RelayProxy proxy = new RelayProxy();
+                    proxy.head = header;
+                    proxy.data = encryptData;
+                    out.add(proxy);
+
+//                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+//                    Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
+//                    String serverRandom = String.valueOf(session.getServerRandom());
+//                    log.info("decrypt key: {}", serverRandom);
+//                    String original = TbaAes.decode(new String(encryptData, "utf-8"), serverRandom);
+
+//                    ChatReq req = new TbaToolsKit<ChatReq>().deserialize(original.getBytes("ISO8859-1"), ChatReq.class);
+//                    log.info("decrypt key: {}", serverRandom);
+                }
             }
             else {
                 msg = new TsRpcByteBuffer(msg_len);
@@ -74,10 +102,10 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 for (int i = 0; i < msg_len - 6; i++) {
                     msg.WriteByte(in.readByte());
                 }
-            }
 
-            TsRpcEventParser parser = new TsRpcEventParser(msg);
-            TsRpcHead header = parser.Head();
+                TsRpcEventParser parser = new TsRpcEventParser(msg);
+                header = parser.Head();
+            }
 
             log.info("msg receive type: {}", header.GetType());
 
@@ -85,14 +113,6 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
                     TsRpcProtocolFactory<ConnectReq> protocol = new TsRpcProtocolFactory<ConnectReq>(msg);
                     out.add(protocol.Decode(ConnectReq.class));
-                }
-                else if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ){
-
-                    long suid = header.GetAttach1() | header.GetAttach2() << 32;
-                    long duid = header.GetAttach3() | header.GetAttach4() << 32;
-
-                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-                    relayManager.relayMessage((long)suid, relay);
                 }
                 else {
 

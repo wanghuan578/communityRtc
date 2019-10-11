@@ -19,6 +19,7 @@ public class RpcEventType {
     public final static int ROOMGATE_CONNECT_RES = com.spirit.community.protocol.thrift.roomgate.MessageType.MT_CONNECT_RES.getValue();
     public final static int ROOMGATE_CHAT_REQ = com.spirit.community.protocol.thrift.roomgate.MessageType.MT_CHAT_REQ.getValue();
     public final static int ROOMGATE_CHAT_RES = com.spirit.community.protocol.thrift.roomgate.MessageType.MT_CHAT_RES.getValue();
+    public final static int ROOMGATE_CHAT_NOTIFY = com.spirit.community.protocol.thrift.roomgate.MessageType.MT_CHAT_NOTIFY.getValue();
 
 
 

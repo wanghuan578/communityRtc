@@ -1,12 +1,15 @@
 package com.spirit.community.roomgate.biz;
 
 
+import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
+import com.spirit.community.roomgate.relay.RelayProxy;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.client.TbaRelayEvent;
 import com.spirit.tba.core.*;
+import com.spirit.tba.tools.TbaHeadUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -41,16 +44,23 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				log.info("encrypt key: {}", key);
 				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);
 
-				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + TbaConstant.MAGIC_WHOLE_OFFSET);
-
-				byteBuff.WriteI32(encrypt.length() + TbaConstant.MAGIC_WHOLE_OFFSET);
+				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + TsMagic.MAGIC_OFFSET);
+				byteBuff.WriteI32(encrypt.length() + TsMagic.MAGIC_OFFSET);
 				byteBuff.WriteI16(EncryptType.WHOLE);
 				byteBuff.copy(encrypt.getBytes());
 				byte [] o = byteBuff.GetBytes();
 				out.writeBytes(o, 0, o.length);
 			}
 			else if (ev.getEncryptType() == EncryptType.BODY) {
-
+				if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_NOTIFY) {
+					RelayProxy proxy = (RelayProxy) ev.getBody();
+					int len = proxy.data.length + TbaHeadUtil.HEAD_SIZE;
+					TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(len);
+					TbaHeadUtil.build(byteBuff, proxy.head, len);
+					byteBuff.copy(proxy.data);
+					byte [] o = byteBuff.GetBytes();
+					out.writeBytes(o, 0, o.length);
+				}
 			}
 			else {
 				TsRpcHead head = ev.getHead();

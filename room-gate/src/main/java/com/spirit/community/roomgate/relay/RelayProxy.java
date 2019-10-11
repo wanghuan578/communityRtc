@@ -4,4 +4,5 @@ import com.spirit.tba.core.TsRpcHead;
 
 public class RelayProxy {
     public TsRpcHead head;
+    public byte[] data;
 }
