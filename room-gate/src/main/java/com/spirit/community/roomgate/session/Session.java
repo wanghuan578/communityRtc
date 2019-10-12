@@ -15,10 +15,11 @@ public class Session {
     private Channel channel = null;
     private Long lastCommunicateTimeStamp = 0l;
     private Long uid;
+    private String roomgateId;
 
-    public Session(String ChannelId) {
-        this.channelId = ChannelId;
-    }
+//    public Session(String ChannelId) {
+//        this.channelId = ChannelId;
+//    }
 
     public String getChannelId() {
         return channelId;
@@ -35,5 +36,14 @@ public class Session {
         state = ClientState.CONNECT_UNAUTHORIZED;
         channel = ctx.channel();
     }
+
+    public Session(ChannelHandlerContext ctx, Long serverRnd, String roomgateId) {
+        channelId = ctx.channel().id().asLongText();
+        connectTime = System.currentTimeMillis();
+        serverRandom = serverRnd;
+        state = ClientState.CONNECT_UNAUTHORIZED;
+        channel = ctx.channel();
+    }
+
 
 }

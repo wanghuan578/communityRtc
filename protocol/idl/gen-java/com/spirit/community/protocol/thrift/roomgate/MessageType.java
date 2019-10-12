@@ -14,14 +14,16 @@ import org.apache.thrift.TEnum;
 public enum MessageType implements org.apache.thrift.TEnum {
   MT_CONNECT_REQ(600),
   MT_CONNECT_RES(601),
-  MT_GET_ROOMLIST_REQ(602),
-  MT_GET_ROOMLIST_RES(603),
-  MT_UPDATE_ROOMLIST_NOTIFY(604),
-  UPDATE_USERINFO_REQ(605),
-  UPDATE_USERINFO_RES(606),
-  MT_CHAT_REQ(607),
-  MT_CHAT_RES(608),
-  MT_CHAT_NOTIFY(609);
+  MT_ROOMGATE_CONNECT_REQ(602),
+  MT_ROOMGATE_CONNECT_RES(603),
+  MT_GET_ROOMLIST_REQ(604),
+  MT_GET_ROOMLIST_RES(605),
+  MT_UPDATE_ROOMLIST_NOTIFY(606),
+  UPDATE_USERINFO_REQ(607),
+  UPDATE_USERINFO_RES(608),
+  MT_CHAT_REQ(609),
+  MT_CHAT_RES(610),
+  MT_CHAT_NOTIFY(611);
 
   private final int value;
 
@@ -47,20 +49,24 @@ public enum MessageType implements org.apache.thrift.TEnum {
       case 601:
         return MT_CONNECT_RES;
       case 602:
-        return MT_GET_ROOMLIST_REQ;
+        return MT_ROOMGATE_CONNECT_REQ;
       case 603:
-        return MT_GET_ROOMLIST_RES;
+        return MT_ROOMGATE_CONNECT_RES;
       case 604:
-        return MT_UPDATE_ROOMLIST_NOTIFY;
+        return MT_GET_ROOMLIST_REQ;
       case 605:
-        return UPDATE_USERINFO_REQ;
+        return MT_GET_ROOMLIST_RES;
       case 606:
-        return UPDATE_USERINFO_RES;
+        return MT_UPDATE_ROOMLIST_NOTIFY;
       case 607:
-        return MT_CHAT_REQ;
+        return UPDATE_USERINFO_REQ;
       case 608:
-        return MT_CHAT_RES;
+        return UPDATE_USERINFO_RES;
       case 609:
+        return MT_CHAT_REQ;
+      case 610:
+        return MT_CHAT_RES;
+      case 611:
         return MT_CHAT_NOTIFY;
       default:
         return null;

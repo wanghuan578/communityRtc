@@ -54,10 +54,10 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 			else if (ev.getEncryptType() == EncryptType.BODY) {
 				if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_NOTIFY) {
 					RelayProxy proxy = (RelayProxy) ev.getBody();
-					int len = proxy.data.length + TbaHeadUtil.HEAD_SIZE;
+					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(len);
-					TbaHeadUtil.build(byteBuff, proxy.head, len);
-					byteBuff.copy(proxy.data);
+					TbaHeadUtil.build(byteBuff, proxy.getHead(), len);
+					byteBuff.copy(proxy.getData());
 					byte [] o = byteBuff.GetBytes();
 					out.writeBytes(o, 0, o.length);
 				}

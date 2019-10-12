@@ -12,9 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionFactory {
 
     protected final Map<String, Session> sessionMap;
+    //protected final Map<String, RoomGateSession> roomgateSessionMap;
 
     public SessionFactory() {
         sessionMap = new ConcurrentHashMap<>();
+        //roomgateSessionMap = new ConcurrentHashMap<>();
     }
 
     public void addSession(Session session) {
@@ -22,8 +24,26 @@ public class SessionFactory {
         sessionMap.put(session.getChannelId(), session);
     }
 
+    public void addRoomGateSession(Session session) {
+        log.info("add roomGateSession: {}", JSON.toJSONString(session, true));
+        sessionMap.put(session.getRoomgateId(), session);
+    }
+
     public Session getSessionByChannelId(String channelId) {
         return sessionMap.get(channelId);
+    }
+
+    public Session getRoomGateSessionByRoomgateId(String roomgateId) {
+        return sessionMap.get(roomgateId);
+    }
+
+    public Session getRoomGateSessionByChannelId(String channelId) {
+        for (Session session : sessionMap.values()) {
+            if (session.getChannelId().equalsIgnoreCase(channelId)) {
+                return session;
+            }
+        }
+        return null;
     }
 
     public Session getSessionByUid(Long uid) {//todo data syncrinize
@@ -42,6 +62,15 @@ public class SessionFactory {
 
     public Session removeById(String channelId) {
         return sessionMap.remove(channelId);
+    }
+
+    public Session removeByRoomgateId(String roomgateId) {
+        for (Session sess : sessionMap.values()) {
+            if (sess.getRoomgateId().equalsIgnoreCase(roomgateId)) {
+                return sessionMap.remove(sess.getChannelId());
+            }
+        }
+        return null;
     }
 
     public void authorized(String channelId, Long uid) {

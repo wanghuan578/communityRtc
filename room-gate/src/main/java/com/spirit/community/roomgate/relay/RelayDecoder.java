@@ -1,6 +1,8 @@
 package com.spirit.community.roomgate.relay;
 
 import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.protocol.thrift.common.CommonRes;
+import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.session.Session;
@@ -16,18 +18,18 @@ import java.util.List;
 @Slf4j
 public class RelayDecoder extends ByteToMessageDecoder {
 
-    private String serverId;
+    private String roomGateId;
 
     public RelayDecoder(String serverId) {
-        this.serverId = serverId;
+        this.roomGateId = serverId;
     }
 
     public String getServerId() {
-        return serverId;
+        return roomGateId;
     }
 
-    public void setServerId(String serverId) {
-        this.serverId = serverId;
+    public void setServerId(String roomGateId) {
+        this.roomGateId = roomGateId;
     }
 
     @Override
@@ -57,6 +59,9 @@ public class RelayDecoder extends ByteToMessageDecoder {
                 relay = original.getBytes("ISO8859-1");
                 msg = new TsRpcByteBuffer(relay, relay.length);
             }
+            if(flag == EncryptType.BODY) {
+                throw new IllegalArgumentException("分支错误");
+            }
             else {
                 msg = new TsRpcByteBuffer(msg_len);
                 msg.WriteI32(msg_len);
@@ -72,12 +77,13 @@ public class RelayDecoder extends ByteToMessageDecoder {
             log.info("msg receive type: {}", header.GetType());
 
             try {
-                if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
-                    TsRpcProtocolFactory<ConnectReq> protocol = new TsRpcProtocolFactory<ConnectReq>(msg);
-                    out.add(protocol.Decode(ConnectReq.class));
+                if (header.GetType() == RpcEventType.CONNECT_RES) {
+                    TsRpcProtocolFactory<CommonRes> protocol = new TsRpcProtocolFactory<CommonRes>(msg);
+                    out.add(protocol.Decode(CommonRes.class));
                 }
-                else {
-
+                else if (header.GetType() == RpcEventType.MT_HELLO_NOTIFY) {
+                    TsRpcProtocolFactory<HelloNotify> protocol = new TsRpcProtocolFactory<HelloNotify>(msg);
+                    out.add(protocol.Decode(HelloNotify.class));
                 }
             }
             catch(TbaException e){

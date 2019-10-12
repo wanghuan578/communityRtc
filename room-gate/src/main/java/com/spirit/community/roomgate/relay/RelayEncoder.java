@@ -1,11 +1,14 @@
 package com.spirit.community.roomgate.relay;
 
 
+import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
+import com.spirit.tba.tools.TbaHeadUtil;
+import com.spirit.tba.tools.TbaToolsKit;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -15,18 +18,18 @@ import org.apache.thrift.TBase;
 @Slf4j
 public class RelayEncoder extends MessageToByteEncoder<Object> {
 
-	private String serverId;
+	private String roomGateId;
 
 	public RelayEncoder(String serverId) {
-		this.serverId = serverId;
+		this.roomGateId = serverId;
 	}
 
 	public String getServerId() {
-		return serverId;
+		return roomGateId;
 	}
 
-	public void setServerId(String serverId) {
-		this.serverId = serverId;
+	public void setServerId(String roomGateId) {
+		this.roomGateId = roomGateId;
 	}
 
 	@Override
@@ -54,6 +57,29 @@ public class RelayEncoder extends MessageToByteEncoder<Object> {
 				byte [] o = byteBuff.GetBytes();
 				log.info("encrypt out buff len: {}", o.length);
 				out.writeBytes(o, 0, o.length);
+			}
+			else if (ev.getEncryptType() == EncryptType.BODY) {
+
+				TsRpcHead head = ev.getHead();
+				head.SetFlag(ev.getEncryptType());
+
+				try {
+					byte[] data = new TbaToolsKit<TBase>().serialize((TBase) ev.getBody(), ev.getLength());
+					SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+					Session roomGateSession = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
+
+					log.info("encrypt key: " + roomGateSession.getServerRandom());
+					String encrypt = TbaAes.encode(new String(data, "ISO8859-1"), String.valueOf(roomGateSession.getServerRandom()));
+					int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
+					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
+					TbaHeadUtil.build(protocol, head, len);
+					protocol.copy(encrypt.getBytes());
+					byte [] o = protocol.GetBytes();
+					log.info("encrypt msg len: " + o.length);
+					out.writeBytes(o, 0, o.length);
+				} catch (TbaException e) {
+					log.error(e.getLocalizedMessage(), e);
+				}
 			}
 			else {
 				TsRpcHead head = ev.getHead();

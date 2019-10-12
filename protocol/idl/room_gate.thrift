@@ -5,6 +5,8 @@ enum MessageType
 {  
     MT_CONNECT_REQ = 600,
     MT_CONNECT_RES,
+	MT_ROOMGATE_CONNECT_REQ,
+    MT_ROOMGATE_CONNECT_RES,
     MT_GET_ROOMLIST_REQ,
     MT_GET_ROOMLIST_RES,
     MT_UPDATE_ROOMLIST_NOTIFY,
@@ -49,6 +51,19 @@ struct ConnectReq
 {
     1:string       sessoin_ticket,
     2:string       checksum,
+}
+
+struct RoomgateConnectReq
+{
+    1:string       sessoin_ticket,
+    2:string       checksum,
+}
+
+struct RoomgateConnectChecksum
+{
+    1:string           	roomgate_id,
+    2:i64           	client_random,
+    3:i64           	server_random,
 }
 
 struct ConnectChecksum

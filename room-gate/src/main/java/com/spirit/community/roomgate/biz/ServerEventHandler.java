@@ -2,13 +2,15 @@ package com.spirit.community.roomgate.biz;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.pojo.RoomGateInfo;
 import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
-import com.spirit.community.protocol.thrift.roomgate.ChatReq;
-import com.spirit.community.protocol.thrift.roomgate.ConnectChecksum;
-import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
+import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
+import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReqChecksum;
+import com.spirit.community.protocol.thrift.roomgate.*;
 import com.spirit.community.roomgate.redis.RedisUtil;
+import com.spirit.community.roomgate.relay.RelayManager;
 import com.spirit.community.roomgate.relay.RelayProxy;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
@@ -42,6 +44,9 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
     @Autowired
     private RoomGateInfoService roomGateInfoService;
 
+    @Autowired
+    private RelayManager relayManager;
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
@@ -51,7 +56,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
         HelloNotify notify = new HelloNotify();
         notify.error_code = 20001;
         notify.setServer_random(serverRandom);
-        notify.setService_id(1000);
+        notify.setService_id(Integer.valueOf(roomGateInfoService.getRoomGateInfo().getRoomGateId()));
         notify.setError_text("OK");
 
         TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
@@ -86,7 +91,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 if (session.getServerRandom() != checksum.getServer_random()) {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
-                    TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
+                    TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
                     ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
                     ctx.flush();
                     return;
@@ -107,18 +112,18 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 res.error_text = UNEXPECTED_EXCEPTION.text();
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
+            TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
             ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
             ctx.flush();
         }
         else if (msg instanceof RelayProxy) {
             RelayProxy proxy = (RelayProxy) msg;
-            TsRpcHead header = proxy.head;
+            TsRpcHead header = proxy.getHead();
 
             long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
             long destUid = header.GetAttach3() | header.GetAttach4() << 32;
 
-            RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(srcUid));
+            RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
 
             if (user != null) {
                 String rid = user.getRoomGateInfo().getRoomGateId();
@@ -130,7 +135,33 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                         session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                     }
                 }
+                else {
+                    RoomGateInfo info = user.getRoomGateInfo();
+                    relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId());
+                }
             }
+            else {
+                //写入数据库
+            }
+        }
+        else if (msg instanceof RoomgateConnectReq) {
+            RoomgateConnectReq entity = (RoomgateConnectReq) msg;
+            RoomgateConnectChecksum checksum = null;
+            try {
+                checksum = new TbaToolsKit<RoomgateConnectChecksum>().deserialize(entity.checksum.getBytes("ISO8859-1"), RoomgateConnectChecksum.class);
+                Session session = sessionFactory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
+                if (session.getServerRandom().longValue() == checksum.server_random) {
+                    session.setRoomgateId(checksum.roomgate_id);
+                    sessionFactory.addRoomGateSession(session);
+                }
+                else {
+                    sessionFactory.removeById(ctx.channel().id().asLongText());
+                }
+            } catch (IllegalAccessException | TbaException | InstantiationException | UnsupportedEncodingException e) {
+                log.error(e.getLocalizedMessage(), e);
+            }
+
+            log.info("RoomgateConnectChecksum: {}", JSON.toJSONString(checksum, true));
         }
 
 

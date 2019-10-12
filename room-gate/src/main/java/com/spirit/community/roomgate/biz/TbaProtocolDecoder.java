@@ -4,6 +4,7 @@ import java.util.List;
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.protocol.thrift.roomgate.ChatReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
+import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.relay.RelayManager;
 import com.spirit.community.roomgate.relay.RelayProxy;
@@ -59,11 +60,18 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 header = parser.Head();
             }
             else if (flag == EncryptType.BODY) {
+
                 log.info("encrypt type: {}", flag);
+
                 byte[] all = new byte[TbaHeadUtil.HEAD_SIZE];
                 System.arraycopy(magic, 0 , all, 0, TsMagic.MAGIC_OFFSET);
                 for (int i = TsMagic.MAGIC_OFFSET; i < TbaHeadUtil.HEAD_SIZE; i++) {
                     all[i] = in.readByte();
+                }
+
+                byte[] encryptData = new byte[msg_len - TbaHeadUtil.HEAD_SIZE];
+                for (int i = 0; i < msg_len - TbaHeadUtil.HEAD_SIZE; i++) {
+                    encryptData[i] = in.readByte();
                 }
 
                 header = TbaHeadUtil.parser(all);
@@ -75,14 +83,11 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 //                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
 //                    relayManager.relayMessage((long)suid, relay);
 
-                    byte[] encryptData = new byte[msg_len - TbaHeadUtil.HEAD_SIZE];
-                    for (int i = 0; i < msg_len - TbaHeadUtil.HEAD_SIZE; i++) {
-                        encryptData[i] = in.readByte();
-                    }
+
 
                     RelayProxy proxy = new RelayProxy();
-                    proxy.head = header;
-                    proxy.data = encryptData;
+                    proxy.setHead(header);
+                    proxy.setData(encryptData);
                     out.add(proxy);
 
 //                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
@@ -94,6 +99,18 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 //                    ChatReq req = new TbaToolsKit<ChatReq>().deserialize(original.getBytes("ISO8859-1"), ChatReq.class);
 //                    log.info("decrypt key: {}", serverRandom);
                 }
+                else if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
+                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+                    Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
+                    String serverRandom = String.valueOf(session.getServerRandom());
+                    log.info("decrypt key: {}", serverRandom);
+                    String original = TbaAes.decode(new String(encryptData, "utf-8"), serverRandom);
+
+                    RoomgateConnectReq req = new TbaToolsKit<RoomgateConnectReq>().deserialize(original.getBytes("ISO8859-1"), RoomgateConnectReq.class);
+                    out.add(req);
+                }
+
+                return;
             }
             else {
                 msg = new TsRpcByteBuffer(msg_len);
@@ -110,7 +127,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             log.info("msg receive type: {}", header.GetType());
 
             try {
-                if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
+                if (header.GetType() == RpcEventType.CONNECT_REQ) {
                     TsRpcProtocolFactory<ConnectReq> protocol = new TsRpcProtocolFactory<ConnectReq>(msg);
                     out.add(protocol.Decode(ConnectReq.class));
                 }

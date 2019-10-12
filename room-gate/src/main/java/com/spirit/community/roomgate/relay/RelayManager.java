@@ -1,17 +1,14 @@
 package com.spirit.community.roomgate.relay;
 
 import com.spirit.community.common.pojo.RoomgateUser;
-import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
-import com.spirit.tba.client.TbaClient;
 import com.spirit.tba.client.TbaRelayEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,18 +25,31 @@ public class RelayManager {
     @Autowired
     private SessionFactory sessionFactory;
 
-    private Map<String, TbaClient<Object>> serverSession;
+
+    private final Map<String, RelayClient<RelayProxy>> roomgateSession;
 
     public RelayManager() {
-        serverSession = new ConcurrentHashMap<>();
+        roomgateSession = new ConcurrentHashMap<>();
     }
 
-    public void openServer(String ip, int port, String serverId) {
-        TbaClient<Object> c = new TbaClient<Object>();
-        c.config(new RelayDecoder(serverId), new RelayEncoder(serverId), new RelayEventHandler(serverId));
+    public Map<String, RelayClient<RelayProxy>> getRoomgateSession() {
+        return roomgateSession;
+    }
+
+    public void putData(String roomgateId, RelayProxy obj) {
+        RelayClient<RelayProxy> client = roomgateSession.get(roomgateId);
+        if (client != null) {
+            client.getRelayMsgQueue().offer(obj);
+        }
+    }
+
+    public synchronized void openRoomGate(String ip, int port, String roomgateId) {
+
+        RelayClient<RelayProxy> c = new RelayClient<RelayProxy>();
+        c.config(new RelayDecoder(roomgateId), new RelayEncoder(roomgateId), new RelayEventHandler(roomgateId));
         try {
             c.connect(ip, port);
-            serverSession.put(serverId, c);
+            roomgateSession.put(roomgateId, c);
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
         }
