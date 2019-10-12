@@ -23,7 +23,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 		TbaEvent ev = (TbaEvent) msg;
 
 		try {
-			if (ev.isEncrypt()) {
+			if (ev.getEncryptType() == 0) {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
 				byte[] buf = protocol.Encode().OutStream().GetBytes();

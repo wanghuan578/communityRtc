@@ -92,7 +92,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
                     TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
-                    ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
+                    ctx.write(new TbaEvent(head, res, 256, EncryptType.WHOLE));
                     ctx.flush();
                     return;
                 }
@@ -112,8 +112,8 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 res.error_text = UNEXPECTED_EXCEPTION.text();
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
-            ctx.write(new TbaEvent(head, res, 128, EncryptType.WHOLE));
+            TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_RES);
+            ctx.write(new TbaEvent(head, res, 256, EncryptType.WHOLE));
             ctx.flush();
         }
         else if (msg instanceof RelayProxy) {
