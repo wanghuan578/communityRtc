@@ -71,4 +71,8 @@ public class RelayManager {
             sess.getChannel().writeAndFlush(new TbaRelayEvent(msg));
         }
     }
+
+    public RelayClient getRelayClientByRoomgateId(String roomgateId) {
+        return roomgateSession.get(roomgateId);
+    }
 }

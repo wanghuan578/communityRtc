@@ -2,6 +2,7 @@ package com.spirit.community.roomgate.relay;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
@@ -51,6 +52,10 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             HelloNotify notify = (HelloNotify) o;
             System.out.println(JSON.toJSONString(notify, true));
 
+            SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+            Session roomgeteSesion = new Session(ctx, notify.server_random, String.valueOf(notify.service_id));
+            factory.addSession(roomgeteSesion);
+
             long rnd = new Random().nextLong();
             long clientRandom = rnd > 0 ? rnd : rnd * (-1);
 
@@ -64,13 +69,22 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             byte[] data = new TbaToolsKit<RoomgateConnectChecksum>().serialize(checksum, 512);
             req.checksum = new String(data, "ISO8859-1");
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
+            TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_REQ);
             ctx.write(new TbaEvent(head, req, 512, EncryptType.BODY));
             ctx.flush();
 
+
+        }
+        else if (o instanceof CommonRes) {
+            CommonRes res = (CommonRes) o;
+            System.out.println(JSON.toJSONString(res, true));
             SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-            Session roomgeteSesion = new Session(ctx, notify.server_random, String.valueOf(notify.service_id));
-            factory.addSession(roomgeteSesion);
+            Session session = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
+
+            RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
+
+            RelayClient<RelayProxy> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
+            c.setAuth(true);
         }
     }
 

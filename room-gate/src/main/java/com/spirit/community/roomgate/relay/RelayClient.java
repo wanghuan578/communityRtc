@@ -45,12 +45,17 @@ public class RelayClient<T extends Proxy> {
     }
 
     public void relay() {
+
         new Thread(new Runnable() {
+
             @Override
             public void run() {
+
+                log.info("relay running...");
+
                 while (running) {
                     synchronized (lock) {
-                        while (!auth) {
+                        if (!auth) {
                             try {
                                 lock.wait();
                             } catch (InterruptedException e) {
@@ -58,11 +63,22 @@ public class RelayClient<T extends Proxy> {
                             }
                         }
                     }
+                    log.info("roomgate relay connect successfully!");
                     T proxy = relayMsgQueue.poll();
-                    channel.writeAndFlush(new TbaEvent(proxy.getHead(), proxy, 512, EncryptType.BODY));
+                    if (proxy != null) {
+                        channel.writeAndFlush(new TbaEvent(proxy.getHead(), proxy, 512, EncryptType.BODY));
+                    }
+                    else {
+                        log.info("empty msg queue");
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            log.error(e.getLocalizedMessage(), e);
+                        }
+                    }
                 }
             }
-        });
+        }).start();
     }
 
     public void config(ByteToMessageDecoder decoder, MessageToByteEncoder<Object> encoder, SimpleChannelInboundHandler eventHandler) {

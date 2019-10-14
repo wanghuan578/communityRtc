@@ -43,6 +43,7 @@ public class Session {
         serverRandom = serverRnd;
         state = ClientState.CONNECT_UNAUTHORIZED;
         channel = ctx.channel();
+        this.roomgateId = roomgateId;
     }
 
 
