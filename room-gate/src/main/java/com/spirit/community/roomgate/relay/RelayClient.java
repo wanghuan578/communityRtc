@@ -1,6 +1,5 @@
 package com.spirit.community.roomgate.relay;
 
-
 import com.spirit.tba.core.EncryptType;
 import com.spirit.tba.core.TbaEvent;
 import io.netty.bootstrap.Bootstrap;
@@ -11,12 +10,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-
+import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+@Slf4j
 public class RelayClient<T extends Proxy> {
 
     private Channel channel = null;
@@ -26,6 +25,7 @@ public class RelayClient<T extends Proxy> {
     private final Queue<T> relayMsgQueue;
     private volatile boolean running;
     private boolean auth;
+    private Object lock = new Object();
 
     public RelayClient() {
         relayMsgQueue = new LinkedBlockingQueue<T>();
@@ -39,6 +39,9 @@ public class RelayClient<T extends Proxy> {
 
     public void setAuth(boolean auth) {
         this.auth = auth;
+        synchronized (lock) {
+            lock.notify();
+        }
     }
 
     public void relay() {
@@ -46,6 +49,15 @@ public class RelayClient<T extends Proxy> {
             @Override
             public void run() {
                 while (running) {
+                    synchronized (lock) {
+                        while (!auth) {
+                            try {
+                                lock.wait();
+                            } catch (InterruptedException e) {
+                                log.error(e.getLocalizedMessage(), e);
+                            }
+                        }
+                    }
                     T proxy = relayMsgQueue.poll();
                     channel.writeAndFlush(new TbaEvent(proxy.getHead(), proxy, 512, EncryptType.BODY));
                 }
@@ -81,11 +93,9 @@ public class RelayClient<T extends Proxy> {
                 .addListener((ChannelFutureListener) future -> {
                     if (future.isSuccess()) {
                         channel = (SocketChannel) future.channel();
-                        //SRpcBizApp.getInstance().setState(State.LOGIN_SERVER_CONNECT);
                     } else {
                         future.channel().close();
                         group.shutdownGracefully();
-                        //SRpcBizApp.getInstance().setState(State.LOGIN_SERVER_DISCONNECT);
                     }
                 });
     }
@@ -98,8 +108,8 @@ public class RelayClient<T extends Proxy> {
         return channel;
     }
 
-    public void putRelayEvent(TbaEvent ev) {
-        channel.writeAndFlush(ev);
+    public void putRelayEvent(T ev) {
+        relayMsgQueue.offer(ev);
     }
 
 

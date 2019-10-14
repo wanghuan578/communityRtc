@@ -1,5 +1,6 @@
 package com.spirit.community.roomgate.relay;
 
+import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.spirit.community.common.exception.ExceptionCode.ROOMGATE_RELAY_CHANNEL_EXIST;
 
 @Slf4j
 @Component
@@ -43,12 +46,17 @@ public class RelayManager {
         }
     }
 
-    public synchronized void openRoomGate(String ip, int port, String roomgateId) {
+    public synchronized void openRoomGate(String ip, int port, String roomgateId, RelayProxy ev) throws MainStageException {
 
+        if (roomgateSession.get(roomgateId) != null) {
+            throw new MainStageException(ROOMGATE_RELAY_CHANNEL_EXIST);
+        }
         RelayClient<RelayProxy> c = new RelayClient<RelayProxy>();
         c.config(new RelayDecoder(roomgateId), new RelayEncoder(roomgateId), new RelayEventHandler(roomgateId));
         try {
             c.connect(ip, port);
+            c.relay();
+            c.putRelayEvent(ev);
             roomgateSession.put(roomgateId, c);
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);

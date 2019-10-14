@@ -13,6 +13,8 @@ public enum ExceptionCode {
     PARAM_NONE_EXCEPTION("0006", "参数异常"),
     INVITE_CODE_INVALID("0007", "邀请码无效"),
     SERVER_RANDOM_INVALID("0008", "Server Random无效"),
+    ROOMGATE_RELAY_CHANNEL_EXIST("0009", "RoomGate Relay Channel Exist"),
+    ROOMGATE_CONNECT_FAILED("0009", "RoomGate Connect Failed"),
 
 
     UNEXPECTED_EXCEPTION("1000", "未知异常"),
