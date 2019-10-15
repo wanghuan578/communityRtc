@@ -24,17 +24,22 @@ public class SessionFactory {
         sessionMap.put(session.getChannelId(), session);
     }
 
-    public void addRoomGateSession(Session session) {
-        log.info("add roomGateSession: {}", JSON.toJSONString(session, true));
-        sessionMap.put(session.getRoomgateId(), session);
-    }
+//    public void addRoomGateSession(Session session) {
+//        log.info("add roomGateSession: {}", JSON.toJSONString(session, true));
+//        sessionMap.put(session.getRoomgateId(), session);
+//    }
 
     public Session getSessionByChannelId(String channelId) {
         return sessionMap.get(channelId);
     }
 
-    public Session getRoomGateSessionByRoomgateId(String roomgateId) {
-        return sessionMap.get(roomgateId);
+    public Session getByRoomgateId(String roomgateId) {
+        for (Session session : sessionMap.values()) {
+            if ((session.getRoomgateId() != null) && session.getRoomgateId().equalsIgnoreCase(roomgateId)) {
+                return session;
+            }
+        }
+        return null;
     }
 
     public Session getRoomGateSessionByChannelId(String channelId) {

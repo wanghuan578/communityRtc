@@ -62,6 +62,17 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					byte [] o = byteBuff.GetBytes();
 					out.writeBytes(o, 0, o.length);
 				}
+				else if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+					RelayProxy proxy = (RelayProxy) ev.getBody();
+					proxy.getHead().SetFlag(EncryptType.BODY);
+					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
+					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
+					TbaHeadUtil.build(protocol, proxy.getHead(), len);
+					protocol.copy(proxy.getData());
+					byte [] o = protocol.GetBytes();
+					log.info("encrypt msg len: " + o.length);
+					out.writeBytes(o, 0, o.length);
+				}
 				else {
 					byte[] data = new TbaToolsKit<TBase>().serialize((TBase) ev.getBody(), ev.getLength());
 					SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);

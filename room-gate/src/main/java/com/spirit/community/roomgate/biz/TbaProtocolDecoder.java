@@ -76,7 +76,17 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
                 header = TbaHeadUtil.parser(all);
 
-                if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ) {
+                if (header.GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+
+                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+                    Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
+                    RelayProxy proxy = new RelayProxy();
+                    proxy.setHead(header);
+                    proxy.setData(encryptData);
+                    out.add(proxy);
+
+                }
+                else if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ) {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());

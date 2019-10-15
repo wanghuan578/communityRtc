@@ -145,6 +145,11 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                         if (relayManager.isConnect(destRoomgateInfo.getRoomGateId())) {
                             relayManager.putData(destRoomgateInfo.getRoomGateId(), proxy);
                         }
+                        else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
+                            //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                        }
                         else {
                             relayManager.openRoomGate(destRoomgateInfo.getIp(), destRoomgateInfo.getPort(), destRoomgateInfo.getRoomGateId(), proxy);
                         }
@@ -168,7 +173,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 if (session.getServerRandom().longValue() == checksum.server_random) {
                     session.setRoomgateId(checksum.roomgate_id);
                     session.setRelayChannel(true);
-                    sessionFactory.addRoomGateSession(session);
+                    //sessionFactory.addRoomGateSession(session);
                     res.error_code = 0;
                     res.error_text = "OK";
                 }
