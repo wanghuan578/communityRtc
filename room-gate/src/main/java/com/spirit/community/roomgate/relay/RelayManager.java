@@ -39,11 +39,18 @@ public class RelayManager {
         return roomgateSession;
     }
 
-    public void putData(String roomgateId, RelayProxy obj) {
+    public synchronized void putData(String roomgateId, RelayProxy obj) {
         RelayClient<RelayProxy> client = roomgateSession.get(roomgateId);
         if (client != null) {
             client.getRelayMsgQueue().offer(obj);
         }
+    }
+
+    public Boolean isConnect(String roomgateId) {
+        if (roomgateSession.get(roomgateId) != null) {
+            return true;
+        }
+        return false;
     }
 
     public synchronized void openRoomGate(String ip, int port, String roomgateId, RelayProxy ev) throws MainStageException {
@@ -63,6 +70,10 @@ public class RelayManager {
         }
     }
 
+    public void close(String roomgateId) {
+        log.info("RelayManager roomgateId: {} close", roomgateId);
+        roomgateSession.remove(roomgateId);
+    }
     public void relayMessage(Long uid, byte[] msg) {
 
         RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(uid));

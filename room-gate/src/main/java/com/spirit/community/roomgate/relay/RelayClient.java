@@ -1,7 +1,9 @@
 package com.spirit.community.roomgate.relay;
 
+import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.tba.core.EncryptType;
 import com.spirit.tba.core.TbaEvent;
+import com.spirit.tba.core.TsRpcHead;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -13,6 +15,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
@@ -22,13 +25,13 @@ public class RelayClient<T extends Proxy> {
     private ByteToMessageDecoder decoder = null;
     private MessageToByteEncoder<Object> encoder = null;
     private SimpleChannelInboundHandler eventHandler = null;
-    private final Queue<T> relayMsgQueue;
+    private final BlockingQueue<T> relayMsgQueue;
     private volatile boolean running;
     private boolean auth;
     private Object lock = new Object();
 
     public RelayClient() {
-        relayMsgQueue = new LinkedBlockingQueue<T>();
+        relayMsgQueue = new LinkedBlockingQueue<T>(65535);
         running = true;
         auth = false;
     }
@@ -45,36 +48,29 @@ public class RelayClient<T extends Proxy> {
     }
 
     public void relay() {
-
         new Thread(new Runnable() {
-
             @Override
             public void run() {
-
-                log.info("relay running...");
-
                 while (running) {
                     synchronized (lock) {
                         if (!auth) {
                             try {
                                 lock.wait();
+                                log.info("roomgate relay connect successfully!");
                             } catch (InterruptedException e) {
                                 log.error(e.getLocalizedMessage(), e);
                             }
                         }
                     }
-                    log.info("roomgate relay connect successfully!");
-                    T proxy = relayMsgQueue.poll();
-                    if (proxy != null) {
-                        channel.writeAndFlush(new TbaEvent(proxy.getHead(), proxy, 512, EncryptType.BODY));
-                    }
-                    else {
-                        log.info("empty msg queue");
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            log.error(e.getLocalizedMessage(), e);
-                        }
+
+                    try {
+                        T proxy = relayMsgQueue.take();
+                        log.info("relay msg send...");
+                        TsRpcHead head = new TsRpcHead();
+                        head.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                        channel.writeAndFlush(new TbaEvent(head, proxy, 512, EncryptType.BODY));
+                    } catch (InterruptedException e) {
+                        log.error(e.getLocalizedMessage(), e);
                     }
                 }
             }

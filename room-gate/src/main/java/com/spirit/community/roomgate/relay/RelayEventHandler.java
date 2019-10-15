@@ -41,7 +41,11 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+        Session session = factory.removeById(ctx.channel().id().asLongText());
 
+        RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
+        relayManager.close(session.getRoomgateId());
     }
 
     @Override

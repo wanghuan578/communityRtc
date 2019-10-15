@@ -61,6 +61,7 @@ public class SessionFactory {
     }
 
     public Session removeById(String channelId) {
+        log.info("session channel: {} lost", channelId);
         return sessionMap.remove(channelId);
     }
 

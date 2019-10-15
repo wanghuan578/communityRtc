@@ -130,22 +130,29 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 String rid = user.getRoomGateInfo().getRoomGateId();
                 String localRid = roomGateInfoService.getRoomGateInfo().getRoomGateId();
 
-                if (!user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
-                    Session session = sessionFactory.getSessionByUid(srcUid);
+                if (user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
+                    Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
                         header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
                         session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                     }
                 }
                 else {
-                    //RoomGateInfo info = user.getRoomGateInfo();
-                    RoomGateInfo info = new RoomGateInfo();
-                    info.setIp("localhost");
-                    info.setPort(11001);
-                    info.setRoomGateId(String.valueOf(10001));
+                    RoomGateInfo info = user.getRoomGateInfo();
+//                    RoomGateInfo info = new RoomGateInfo();
+//                    info.setIp("localhost");
+//                    info.setPort(11001);
+//                    info.setRoomGateId(String.valueOf(10001));
 
                     try {
-                        relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
+                        if (relayManager.isConnect(info.getRoomGateId())) {
+                            //relayManager.putData(user.getRoomGateInfo().getRoomGateId(), proxy);
+                            relayManager.putData(info.getRoomGateId(), proxy);
+                        }
+                        else {
+                            relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
+                        }
+
                     } catch (MainStageException e) {
                         log.error(e.getLocalizedMessage(), e);
                     }

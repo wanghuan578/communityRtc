@@ -63,23 +63,37 @@ public class RelayEncoder extends MessageToByteEncoder<Object> {
 				TsRpcHead head = ev.getHead();
 				head.SetFlag(ev.getEncryptType());
 
-				try {
-					byte[] data = new TbaToolsKit<TBase>().serialize((TBase) ev.getBody(), ev.getLength());
-					SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-					Session roomGateSession = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
-
-					log.info("encrypt key: " + roomGateSession.getServerRandom());
-					String encrypt = TbaAes.encode(new String(data, "ISO8859-1"), String.valueOf(roomGateSession.getServerRandom()));
-					int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
+				if (head.GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+					RelayProxy proxy = (RelayProxy) ev.getBody();
+					proxy.getHead().SetFlag(EncryptType.BODY);
+					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
-					TbaHeadUtil.build(protocol, head, len);
-					protocol.copy(encrypt.getBytes());
+					TbaHeadUtil.build(protocol, proxy.getHead(), len);
+					protocol.copy(proxy.getData());
 					byte [] o = protocol.GetBytes();
 					log.info("encrypt msg len: " + o.length);
 					out.writeBytes(o, 0, o.length);
-				} catch (TbaException e) {
-					log.error(e.getLocalizedMessage(), e);
 				}
+				else {
+					try {
+						byte[] data = new TbaToolsKit<TBase>().serialize((TBase) ev.getBody(), ev.getLength());
+						SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+						Session roomGateSession = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
+
+						log.info("encrypt key: " + roomGateSession.getServerRandom());
+						String encrypt = TbaAes.encode(new String(data, "ISO8859-1"), String.valueOf(roomGateSession.getServerRandom()));
+						int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
+						TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
+						TbaHeadUtil.build(protocol, head, len);
+						protocol.copy(encrypt.getBytes());
+						byte [] o = protocol.GetBytes();
+						log.info("encrypt msg len: " + o.length);
+						out.writeBytes(o, 0, o.length);
+					} catch (TbaException e) {
+						log.error(e.getLocalizedMessage(), e);
+					}
+				}
+
 			}
 			else {
 				TsRpcHead head = ev.getHead();
