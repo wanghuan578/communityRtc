@@ -83,21 +83,13 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 //                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
 //                    relayManager.relayMessage((long)suid, relay);
 
-
-
+                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+                    Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
                     RelayProxy proxy = new RelayProxy();
                     proxy.setHead(header);
                     proxy.setData(encryptData);
                     out.add(proxy);
 
-//                    SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-//                    Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
-//                    String serverRandom = String.valueOf(session.getServerRandom());
-//                    log.info("decrypt key: {}", serverRandom);
-//                    String original = TbaAes.decode(new String(encryptData, "utf-8"), serverRandom);
-
-//                    ChatReq req = new TbaToolsKit<ChatReq>().deserialize(original.getBytes("ISO8859-1"), ChatReq.class);
-//                    log.info("decrypt key: {}", serverRandom);
                 }
                 else if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);

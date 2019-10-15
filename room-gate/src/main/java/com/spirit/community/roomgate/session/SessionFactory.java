@@ -48,7 +48,7 @@ public class SessionFactory {
 
     public Session getSessionByUid(Long uid) {//todo data syncrinize
         for (Session sess : sessionMap.values()) {
-            if (sess.getUid().longValue() == uid.longValue()) {
+            if ((sess.getUid() != null) && sess.getUid().longValue() == uid.longValue()) {
                 return sess;
             }
         }

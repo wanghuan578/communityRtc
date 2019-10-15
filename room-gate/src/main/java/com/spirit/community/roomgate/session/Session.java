@@ -16,10 +16,15 @@ public class Session {
     private Long lastCommunicateTimeStamp = 0l;
     private Long uid;
     private String roomgateId;
+    private boolean relayChannel = false;
 
-//    public Session(String ChannelId) {
-//        this.channelId = ChannelId;
-//    }
+    public boolean isRelayChannel() {
+        return relayChannel;
+    }
+
+    public void setRelayChannel(boolean relayChannel) {
+        this.relayChannel = relayChannel;
+    }
 
     public String getChannelId() {
         return channelId;

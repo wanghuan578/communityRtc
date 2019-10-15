@@ -139,10 +139,6 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 }
                 else {
                     RoomGateInfo info = user.getRoomGateInfo();
-//                    RoomGateInfo info = new RoomGateInfo();
-//                    info.setIp("localhost");
-//                    info.setPort(11001);
-//                    info.setRoomGateId(String.valueOf(10001));
 
                     try {
                         if (relayManager.isConnect(info.getRoomGateId())) {
@@ -171,6 +167,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 Session session = sessionFactory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
                 if (session.getServerRandom().longValue() == checksum.server_random) {
                     session.setRoomgateId(checksum.roomgate_id);
+                    session.setRelayChannel(true);
                     sessionFactory.addRoomGateSession(session);
                     res.error_code = 0;
                     res.error_text = "OK";

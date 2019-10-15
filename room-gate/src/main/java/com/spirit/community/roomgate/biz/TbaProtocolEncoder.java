@@ -10,6 +10,7 @@ import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.client.TbaRelayEvent;
 import com.spirit.tba.core.*;
 import com.spirit.tba.tools.TbaHeadUtil;
+import com.spirit.tba.tools.TbaToolsKit;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -59,6 +60,22 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					TbaHeadUtil.build(byteBuff, proxy.getHead(), len);
 					byteBuff.copy(proxy.getData());
 					byte [] o = byteBuff.GetBytes();
+					out.writeBytes(o, 0, o.length);
+				}
+				else {
+					byte[] data = new TbaToolsKit<TBase>().serialize((TBase) ev.getBody(), ev.getLength());
+					SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
+					Session roomGateSession = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
+					TsRpcHead head = ev.getHead();
+					head.SetFlag(ev.getEncryptType());
+					log.info("encrypt key: " + roomGateSession.getServerRandom());
+					String encrypt = TbaAes.encode(new String(data, "ISO8859-1"), String.valueOf(roomGateSession.getServerRandom()));
+					int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
+					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
+					TbaHeadUtil.build(protocol, head, len);
+					protocol.copy(encrypt.getBytes());
+					byte [] o = protocol.GetBytes();
+					log.info("encrypt msg len: " + o.length);
 					out.writeBytes(o, 0, o.length);
 				}
 			}
