@@ -2,6 +2,9 @@ package com.spirit.community.roomgate.relay;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.common.exception.MainStageException;
+import com.spirit.community.common.pojo.RoomGateInfo;
+import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
@@ -9,6 +12,7 @@ import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectChecksum;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
+import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
@@ -78,8 +82,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             ctx.flush();
 
 
-        }
-        else if (o instanceof CommonRes) {
+        } else if (o instanceof CommonRes) {
             CommonRes res = (CommonRes) o;
             System.out.println(JSON.toJSONString(res, true));
             SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
@@ -89,6 +92,53 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
 
             RelayClient<RelayProxy> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
             c.setAuth(true);
+        } else if (o instanceof RelayProxy) {
+
+            RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
+            SessionFactory sessionFactory = ApplicationContextUtils.getBean(SessionFactory.class);
+            RedisUtil redisUtil = ApplicationContextUtils.getBean(RedisUtil.class);
+            RoomGateInfoService roomGateInfoService = ApplicationContextUtils.getBean(RoomGateInfoService.class);
+
+            RelayProxy proxy = (RelayProxy) o;
+            TsRpcHead header = proxy.getHead();
+
+            long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
+            long destUid = header.GetAttach3() | header.GetAttach4() << 32;
+
+            RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
+
+            if (user != null) {
+
+                String rid = user.getRoomGateInfo().getRoomGateId();
+                String localRid = roomGateInfoService.getRoomGateInfo().getRoomGateId();
+
+                if (user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
+                    Session session = sessionFactory.getSessionByUid(destUid);
+                    if (session != null) {
+                        header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
+                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                    }
+                } else {
+                    RoomGateInfo info = user.getRoomGateInfo();
+                    Session session = null;
+                    try {
+                        if (relayManager.isConnect(info.getRoomGateId())) {
+                            relayManager.putData(info.getRoomGateId(), proxy);
+                        } else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
+                            //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                        } else {
+                            relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
+                        }
+
+                    } catch (MainStageException e) {
+                        log.error(e.getLocalizedMessage(), e);
+                    }
+                }
+            } else {
+                //写入数据库
+            }
         }
     }
 

@@ -123,14 +123,15 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
             long destUid = header.GetAttach3() | header.GetAttach4() << 32;
 
-            RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
+            RoomgateUser destUser = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
+            RoomgateUser srcUser = (RoomgateUser) redisUtil.get(String.valueOf(srcUid));
 
-            if (user != null) {
+            if (destUser != null) {
 
-                String rid = user.getRoomGateInfo().getRoomGateId();
+                String rid = destUser.getRoomGateInfo().getRoomGateId();
                 String localRid = roomGateInfoService.getRoomGateInfo().getRoomGateId();
 
-                if (user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
+                if (destUser.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
                     Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
                         header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
@@ -138,15 +139,14 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                     }
                 }
                 else {
-                    RoomGateInfo info = user.getRoomGateInfo();
+                    RoomGateInfo destRoomgateInfo = destUser.getRoomGateInfo();
 
                     try {
-                        if (relayManager.isConnect(info.getRoomGateId())) {
-                            //relayManager.putData(user.getRoomGateInfo().getRoomGateId(), proxy);
-                            relayManager.putData(info.getRoomGateId(), proxy);
+                        if (relayManager.isConnect(destRoomgateInfo.getRoomGateId())) {
+                            relayManager.putData(destRoomgateInfo.getRoomGateId(), proxy);
                         }
                         else {
-                            relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
+                            relayManager.openRoomGate(destRoomgateInfo.getIp(), destRoomgateInfo.getPort(), destRoomgateInfo.getRoomGateId(), proxy);
                         }
 
                     } catch (MainStageException e) {

@@ -78,11 +78,6 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
                 if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ) {
 
-//                    long suid = header.GetAttach1() | header.GetAttach2() << 32;
-//                    long duid = header.GetAttach3() | header.GetAttach4() << 32;
-//                    RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-//                    relayManager.relayMessage((long)suid, relay);
-
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
                     RelayProxy proxy = new RelayProxy();

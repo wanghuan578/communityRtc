@@ -68,6 +68,7 @@ public class RelayEncoder extends MessageToByteEncoder<Object> {
 					proxy.getHead().SetFlag(EncryptType.BODY);
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
+					proxy.getHead().SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
 					TbaHeadUtil.build(protocol, proxy.getHead(), len);
 					protocol.copy(proxy.getData());
 					byte [] o = protocol.GetBytes();
