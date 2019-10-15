@@ -33,15 +33,6 @@ public class SessionFactory {
         return sessionMap.get(channelId);
     }
 
-    public Session getByRoomgateId(String roomgateId) {
-        for (Session session : sessionMap.values()) {
-            if ((session.getRoomgateId() != null) && session.getRoomgateId().equalsIgnoreCase(roomgateId)) {
-                return session;
-            }
-        }
-        return null;
-    }
-
     public Session getRoomGateSessionByChannelId(String channelId) {
         for (Session session : sessionMap.values()) {
             if (session.getChannelId().equalsIgnoreCase(channelId)) {

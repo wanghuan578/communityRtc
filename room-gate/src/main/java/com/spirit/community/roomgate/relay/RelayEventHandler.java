@@ -124,7 +124,8 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                     try {
                         if (relayManager.isConnect(info.getRoomGateId())) {
                             relayManager.putData(info.getRoomGateId(), proxy);
-                        } else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
+                        }
+                        else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
