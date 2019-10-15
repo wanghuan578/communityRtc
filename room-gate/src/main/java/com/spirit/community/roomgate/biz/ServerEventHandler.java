@@ -140,12 +140,12 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 }
                 else {
                     RoomGateInfo destRoomgateInfo = destUser.getRoomGateInfo();
-
+                    Session session = null;
                     try {
                         if (relayManager.isConnect(destRoomgateInfo.getRoomGateId())) {
                             relayManager.putData(destRoomgateInfo.getRoomGateId(), proxy);
                         }
-                        else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
+                        else if ((session = sessionFactory.getByRoomgateId(destRoomgateInfo.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
