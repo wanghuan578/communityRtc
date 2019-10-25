@@ -10,7 +10,7 @@ import com.spirit.community.protocol.thrift.common.HelloNotify;
 import com.spirit.community.protocol.thrift.roomgate.*;
 import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.relay.RelayManager;
-import com.spirit.community.roomgate.relay.RelayProxy;
+import com.spirit.community.roomgate.relay.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
@@ -115,9 +115,9 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             ctx.write(new TbaEvent(head, res, 256, EncryptType.WHOLE));
             ctx.flush();
         }
-        else if (msg instanceof RelayProxy) {
+        else if (msg instanceof RelayProtocol) {
 
-            RelayProxy proxy = (RelayProxy) msg;
+            RelayProtocol proxy = (RelayProtocol) msg;
             TsRpcHead header = proxy.getHead();
 
             long srcUid = header.GetAttach1() | header.GetAttach2() << 32;

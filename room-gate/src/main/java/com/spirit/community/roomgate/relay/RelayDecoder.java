@@ -100,7 +100,7 @@ public class RelayDecoder extends ByteToMessageDecoder {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
-                    RelayProxy proxy = new RelayProxy();
+                    RelayProtocol proxy = new RelayProtocol();
                     proxy.setHead(header);
                     proxy.setData(encryptData);
                     out.add(proxy);

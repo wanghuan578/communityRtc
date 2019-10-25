@@ -7,7 +7,7 @@ import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.relay.RelayManager;
-import com.spirit.community.roomgate.relay.RelayProxy;
+import com.spirit.community.roomgate.relay.RelayProtocol;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -80,7 +80,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
-                    RelayProxy proxy = new RelayProxy();
+                    RelayProtocol proxy = new RelayProtocol();
                     proxy.setHead(header);
                     proxy.setData(encryptData);
                     out.add(proxy);
@@ -90,7 +90,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
-                    RelayProxy proxy = new RelayProxy();
+                    RelayProtocol proxy = new RelayProtocol();
                     proxy.setHead(header);
                     proxy.setData(encryptData);
                     out.add(proxy);

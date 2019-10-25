@@ -90,16 +90,16 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
 
             RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
 
-            RelayClient<RelayProxy> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
+            MsgRelayProxyClient<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
             c.setAuth(true);
-        } else if (o instanceof RelayProxy) {
+        } else if (o instanceof RelayProtocol) {
 
             RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
             SessionFactory sessionFactory = ApplicationContextUtils.getBean(SessionFactory.class);
             RedisUtil redisUtil = ApplicationContextUtils.getBean(RedisUtil.class);
             RoomGateInfoService roomGateInfoService = ApplicationContextUtils.getBean(RoomGateInfoService.class);
 
-            RelayProxy proxy = (RelayProxy) o;
+            RelayProtocol proxy = (RelayProtocol) o;
             TsRpcHead header = proxy.getHead();
 
             long srcUid = header.GetAttach1() | header.GetAttach2() << 32;

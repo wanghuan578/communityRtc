@@ -2,7 +2,7 @@ package com.spirit.community.roomgate.relay;
 
 import com.spirit.tba.core.TsRpcHead;
 
-public class Proxy {
+public class Protocol {
     public void setHead(TsRpcHead head) {
 
     }

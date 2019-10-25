@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
-public class RelayClient<T extends Proxy> {
+public class MsgRelayProxyClient<T extends Protocol> {
 
     private Channel channel = null;
     private ByteToMessageDecoder decoder = null;
@@ -30,7 +30,7 @@ public class RelayClient<T extends Proxy> {
     private boolean auth;
     private Object lock = new Object();
 
-    public RelayClient() {
+    public MsgRelayProxyClient() {
         relayMsgQueue = new LinkedBlockingQueue<T>(65535);
         running = true;
         auth = false;

@@ -2,7 +2,7 @@ package com.spirit.community.roomgate.relay;
 
 import com.spirit.tba.core.TsRpcHead;
 
-public class RelayProxy extends Proxy {
+public class RelayProtocol extends Protocol {
     private TsRpcHead head;
     private byte[] data;
 

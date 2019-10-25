@@ -3,7 +3,7 @@ package com.spirit.community.roomgate.biz;
 
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
-import com.spirit.community.roomgate.relay.RelayProxy;
+import com.spirit.community.roomgate.relay.RelayProtocol;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -54,7 +54,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 			}
 			else if (ev.getEncryptType() == EncryptType.BODY) {
 				if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_NOTIFY) {
-					RelayProxy proxy = (RelayProxy) ev.getBody();
+					RelayProtocol proxy = (RelayProtocol) ev.getBody();
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(len);
 					TbaHeadUtil.build(byteBuff, proxy.getHead(), len);
@@ -63,7 +63,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					out.writeBytes(o, 0, o.length);
 				}
 				else if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
-					RelayProxy proxy = (RelayProxy) ev.getBody();
+					RelayProtocol proxy = (RelayProtocol) ev.getBody();
 					proxy.getHead().SetFlag(EncryptType.BODY);
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);

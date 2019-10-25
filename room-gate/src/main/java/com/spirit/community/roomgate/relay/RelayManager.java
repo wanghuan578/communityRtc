@@ -29,18 +29,18 @@ public class RelayManager {
     private SessionFactory sessionFactory;
 
 
-    private final Map<String, RelayClient<RelayProxy>> roomgateSession;
+    private final Map<String, MsgRelayProxyClient<RelayProtocol>> roomgateSession;
 
     public RelayManager() {
         roomgateSession = new ConcurrentHashMap<>();
     }
 
-    public Map<String, RelayClient<RelayProxy>> getRoomgateSession() {
+    public Map<String, MsgRelayProxyClient<RelayProtocol>> getRoomgateSession() {
         return roomgateSession;
     }
 
-    public synchronized void putData(String roomgateId, RelayProxy obj) {
-        RelayClient<RelayProxy> client = roomgateSession.get(roomgateId);
+    public synchronized void putData(String roomgateId, RelayProtocol obj) {
+        MsgRelayProxyClient<RelayProtocol> client = roomgateSession.get(roomgateId);
         if (client != null) {
             client.getRelayMsgQueue().offer(obj);
         }
@@ -53,12 +53,12 @@ public class RelayManager {
         return false;
     }
 
-    public synchronized void openRoomGate(String ip, int port, String roomgateId, RelayProxy ev) throws MainStageException {
+    public synchronized void openRoomGate(String ip, int port, String roomgateId, RelayProtocol ev) throws MainStageException {
 
         if (roomgateSession.get(roomgateId) != null) {
             throw new MainStageException(ROOMGATE_RELAY_CHANNEL_EXIST);
         }
-        RelayClient<RelayProxy> c = new RelayClient<RelayProxy>();
+        MsgRelayProxyClient<RelayProtocol> c = new MsgRelayProxyClient<RelayProtocol>();
         c.config(new RelayDecoder(roomgateId), new RelayEncoder(roomgateId), new RelayEventHandler(roomgateId));
         try {
             c.connect(ip, port);
@@ -83,7 +83,7 @@ public class RelayManager {
         }
     }
 
-    public RelayClient getRelayClientByRoomgateId(String roomgateId) {
+    public MsgRelayProxyClient getRelayClientByRoomgateId(String roomgateId) {
         return roomgateSession.get(roomgateId);
     }
 }
