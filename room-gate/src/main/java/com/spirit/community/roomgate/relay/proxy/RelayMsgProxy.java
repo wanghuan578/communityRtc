@@ -68,7 +68,7 @@ public class RelayMsgProxy<T extends Protocol> {
                         T elem = bQueue.take();
                         log.info("relay msg send...");
                         TsRpcHead head = new TsRpcHead();
-                        head.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                        head.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                         channel.writeAndFlush(new TbaEvent(head, elem, 512, EncryptType.BODY));
                     } catch (InterruptedException e) {
                         log.error(e.getLocalizedMessage(), e);

@@ -83,7 +83,7 @@ public class RelayMsgDecoder extends ByteToMessageDecoder {
 
                 header = TbaHeadUtil.parser(all);
 
-                if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_RES) {
+                if (header.getType() == RpcEventType.ROOMGATE_CONNECT_RES) {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -95,7 +95,7 @@ public class RelayMsgDecoder extends ByteToMessageDecoder {
                     out.add(res);
 
                 }
-                else if (header.GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+                else if (header.getType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -113,21 +113,21 @@ public class RelayMsgDecoder extends ByteToMessageDecoder {
                 msg.writeI32(msg_len);
                 msg.writeI16(flag);
                 for (int i = 0; i < msg_len - 6; i++) {
-                    msg.WriteByte(in.readByte());
+                    msg.writeByte(in.readByte());
                 }
             }
 
             TsRpcEventParser parser = new TsRpcEventParser(msg);
             header = parser.Head();
 
-            log.info("msg receive type: {}", header.GetType());
+            log.info("msg receive type: {}", header.getType());
 
             try {
-                if (header.GetType() == RpcEventType.CONNECT_RES) {
+                if (header.getType() == RpcEventType.CONNECT_RES) {
                     TsRpcProtocolFactory<CommonRes> protocol = new TsRpcProtocolFactory<CommonRes>(msg);
                     out.add(protocol.Decode(CommonRes.class));
                 }
-                else if (header.GetType() == RpcEventType.MT_HELLO_NOTIFY) {
+                else if (header.getType() == RpcEventType.MT_HELLO_NOTIFY) {
                     TsRpcProtocolFactory<HelloNotify> protocol = new TsRpcProtocolFactory<HelloNotify>(msg);
                     out.add(protocol.Decode(HelloNotify.class));
                 }

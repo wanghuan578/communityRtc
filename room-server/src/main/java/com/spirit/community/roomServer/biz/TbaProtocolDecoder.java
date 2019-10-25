@@ -50,22 +50,22 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 msg.writeI32(msg_len);
                 msg.writeI16(flag);
                 for (int i = 0; i < msg_len - 6; i++) {
-                    msg.WriteByte(in.readByte());
+                    msg.writeByte(in.readByte());
                 }
             }
 
             TsRpcEventParser parser = new TsRpcEventParser(msg);
             TsRpcHead header = parser.Head();
 
-            log.info("msg receive type: {}", header.GetType());
+            log.info("msg receive type: {}", header.getType());
 
             try {
 
-                if (header.GetType() == RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ) {
+                if (header.getType() == RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ) {
                     TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);
                     out.add(protocol.Decode(ClientPasswordLoginReq.class));
                 }
-                else if (header.GetType() == RpcEventType.MT_CLIENT_REGISTER_REQ) {
+                else if (header.getType() == RpcEventType.MT_CLIENT_REGISTER_REQ) {
                     TsRpcProtocolFactory<UserRegisterReq> protocol = new TsRpcProtocolFactory<UserRegisterReq>(msg);
                     out.add(protocol.Decode(UserRegisterReq.class));
                 }

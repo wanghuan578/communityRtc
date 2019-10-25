@@ -62,14 +62,14 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 			else if (ev.getEncryptType() == EncryptType.BODY) {
 
 				TsRpcHead head = ev.getHead();
-				head.SetFlag(ev.getEncryptType());
+				head.setFlag(ev.getEncryptType());
 
-				if (head.GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+				if (head.getType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
 					RelayProtocol proxy = (RelayProtocol) ev.getBody();
-					proxy.getHead().SetFlag(EncryptType.BODY);
+					proxy.getHead().setFlag(EncryptType.BODY);
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
-					proxy.getHead().SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+					proxy.getHead().setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
 					TbaHeadUtil.build(protocol, proxy.getHead(), len);
 					protocol.append(proxy.getData());
 					byte [] o = protocol.toBytes();

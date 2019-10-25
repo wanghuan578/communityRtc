@@ -74,7 +74,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
 
                 header = TbaHeadUtil.parser(all);
 
-                if (header.GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+                if (header.getType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -84,7 +84,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                     out.add(proxy);
 
                 }
-                else if (header.GetType() == RpcEventType.ROOMGATE_CHAT_REQ) {
+                else if (header.getType() == RpcEventType.ROOMGATE_CHAT_REQ) {
 
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -94,7 +94,7 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                     out.add(proxy);
 
                 }
-                else if (header.GetType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
+                else if (header.getType() == RpcEventType.ROOMGATE_CONNECT_REQ) {
                     SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
                     Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
                     String serverRandom = String.valueOf(session.getServerRandom());
@@ -112,17 +112,17 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 msg.writeI32(msg_len);
                 msg.writeI16(flag);
                 for (int i = 0; i < msg_len - 6; i++) {
-                    msg.WriteByte(in.readByte());
+                    msg.writeByte(in.readByte());
                 }
 
                 TsRpcEventParser parser = new TsRpcEventParser(msg);
                 header = parser.Head();
             }
 
-            log.info("msg receive type: {}", header.GetType());
+            log.info("msg receive type: {}", header.getType());
 
             try {
-                if (header.GetType() == RpcEventType.CONNECT_REQ) {
+                if (header.getType() == RpcEventType.CONNECT_REQ) {
                     TsRpcProtocolFactory<ConnectReq> protocol = new TsRpcProtocolFactory<ConnectReq>(msg);
                     out.add(protocol.Decode(ConnectReq.class));
                 }

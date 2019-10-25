@@ -53,7 +53,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				out.writeBytes(o, 0, o.length);
 			}
 			else if (ev.getEncryptType() == EncryptType.BODY) {
-				if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_NOTIFY) {
+				if (ev.getHead().getType() == RpcEventType.ROOMGATE_CHAT_NOTIFY) {
 					RelayProtocol proxy = (RelayProtocol) ev.getBody();
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(len);
@@ -62,9 +62,9 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					byte [] o = byteBuff.toBytes();
 					out.writeBytes(o, 0, o.length);
 				}
-				else if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
+				else if (ev.getHead().getType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
 					RelayProtocol proxy = (RelayProtocol) ev.getBody();
-					proxy.getHead().SetFlag(EncryptType.BODY);
+					proxy.getHead().setFlag(EncryptType.BODY);
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
 					TbaHeadUtil.build(protocol, proxy.getHead(), len);
@@ -78,7 +78,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
 					Session roomGateSession = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
 					TsRpcHead head = ev.getHead();
-					head.SetFlag(ev.getEncryptType());
+					head.setFlag(ev.getEncryptType());
 					log.info("encrypt key: " + roomGateSession.getServerRandom());
 					String encrypt = TbaAes.encode(new String(data, "ISO8859-1"), String.valueOf(roomGateSession.getServerRandom()));
 					int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;

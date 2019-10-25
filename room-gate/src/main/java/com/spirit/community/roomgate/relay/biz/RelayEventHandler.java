@@ -103,8 +103,8 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             RelayProtocol proxy = (RelayProtocol) o;
             TsRpcHead header = proxy.getHead();
 
-            long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
-            long destUid = header.GetAttach3() | header.GetAttach4() << 32;
+            long srcUid = header.getAttachId1() | header.getAttachId2() << 32;
+            long destUid = header.getAttachId3() | header.getAttachId4() << 32;
 
             RoomgateUser user = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
 
@@ -116,7 +116,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                 if (user.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
                     Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
-                        header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
+                        header.setType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
                         session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                     }
                 } else {
@@ -128,7 +128,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                         }
                         else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                            header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            header.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                         } else {
                             relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);

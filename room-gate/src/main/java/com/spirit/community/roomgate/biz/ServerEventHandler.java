@@ -120,8 +120,8 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             RelayProtocol proxy = (RelayProtocol) msg;
             TsRpcHead header = proxy.getHead();
 
-            long srcUid = header.GetAttach1() | header.GetAttach2() << 32;
-            long destUid = header.GetAttach3() | header.GetAttach4() << 32;
+            long srcUid = header.getAttachId1() | header.getAttachId2() << 32;
+            long destUid = header.getAttachId3() | header.getAttachId4() << 32;
 
             RoomgateUser destUser = (RoomgateUser) redisUtil.get(String.valueOf(destUid));
             RoomgateUser srcUser = (RoomgateUser) redisUtil.get(String.valueOf(srcUid));
@@ -134,7 +134,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 if (destUser.getRoomGateInfo().getRoomGateId().equalsIgnoreCase(roomGateInfoService.getRoomGateInfo().getRoomGateId())) {
                     Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
-                        header.SetType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
+                        header.setType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
                         session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                     }
                 }
@@ -147,7 +147,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                         }
                         else if ((session = sessionFactory.getByRoomgateId(destRoomgateInfo.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                            header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
+                            header.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
                         }
                         else {
