@@ -1,4 +1,4 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.session;
 
 import com.spirit.tba.core.TsRpcHead;
 

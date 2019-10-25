@@ -2,12 +2,10 @@ package com.spirit.community.roomgate.biz;
 
 import java.util.List;
 import com.spirit.community.common.constant.RpcEventType;
-import com.spirit.community.protocol.thrift.roomgate.ChatReq;
 import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
-import com.spirit.community.roomgate.relay.RelayManager;
-import com.spirit.community.roomgate.relay.RelayProtocol;
+import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;

@@ -1,11 +1,10 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.biz;
 
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
-import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
-import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
+import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -19,11 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class RelayDecoder extends ByteToMessageDecoder {
+public class RelayMsgDecoder extends ByteToMessageDecoder {
 
     private String roomGateId;
 
-    public RelayDecoder(String serverId) {
+    public RelayMsgDecoder(String serverId) {
         this.roomGateId = serverId;
     }
 

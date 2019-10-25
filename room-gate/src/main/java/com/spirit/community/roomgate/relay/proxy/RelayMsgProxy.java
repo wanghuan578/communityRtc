@@ -1,6 +1,7 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.proxy;
 
 import com.spirit.community.common.constant.RpcEventType;
+import com.spirit.community.roomgate.relay.session.Protocol;
 import com.spirit.tba.core.EncryptType;
 import com.spirit.tba.core.TbaEvent;
 import com.spirit.tba.core.TsRpcHead;
@@ -19,7 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
-public class MsgRelayProxyClient<T extends Protocol> {
+public class RelayMsgProxy<T extends Protocol> {
 
     private Channel channel = null;
     private ByteToMessageDecoder decoder = null;
@@ -30,7 +31,7 @@ public class MsgRelayProxyClient<T extends Protocol> {
     private boolean auth;
     private Object lock = new Object();
 
-    public MsgRelayProxyClient() {
+    public RelayMsgProxy() {
         relayMsgQueue = new LinkedBlockingQueue<T>(65535);
         running = true;
         auth = false;

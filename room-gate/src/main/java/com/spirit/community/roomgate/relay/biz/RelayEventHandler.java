@@ -1,4 +1,4 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.biz;
 
 import com.alibaba.fastjson.JSON;
 import com.spirit.community.common.constant.RpcEventType;
@@ -7,12 +7,13 @@ import com.spirit.community.common.pojo.RoomGateInfo;
 import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.protocol.thrift.common.CommonRes;
 import com.spirit.community.protocol.thrift.common.HelloNotify;
-import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
-import com.spirit.community.protocol.thrift.roomgate.ConnectReq;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectChecksum;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.redis.RedisUtil;
+import com.spirit.community.roomgate.relay.proxy.RelayMsgProxy;
+import com.spirit.community.roomgate.relay.session.RelayManager;
+import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
@@ -90,7 +91,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
 
             RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
 
-            MsgRelayProxyClient<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
+            RelayMsgProxy<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
             c.setAuth(true);
         } else if (o instanceof RelayProtocol) {
 

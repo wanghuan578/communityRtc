@@ -1,8 +1,12 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.session;
 
 import com.spirit.community.common.exception.MainStageException;
 import com.spirit.community.common.pojo.RoomgateUser;
 import com.spirit.community.roomgate.redis.RedisUtil;
+import com.spirit.community.roomgate.relay.proxy.RelayMsgProxy;
+import com.spirit.community.roomgate.relay.biz.RelayMsgDecoder;
+import com.spirit.community.roomgate.relay.biz.RelayMsgEncoder;
+import com.spirit.community.roomgate.relay.biz.RelayEventHandler;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
@@ -29,18 +33,18 @@ public class RelayManager {
     private SessionFactory sessionFactory;
 
 
-    private final Map<String, MsgRelayProxyClient<RelayProtocol>> roomgateSession;
+    private final Map<String, RelayMsgProxy<RelayProtocol>> roomgateSession;
 
     public RelayManager() {
         roomgateSession = new ConcurrentHashMap<>();
     }
 
-    public Map<String, MsgRelayProxyClient<RelayProtocol>> getRoomgateSession() {
+    public Map<String, RelayMsgProxy<RelayProtocol>> getRoomgateSession() {
         return roomgateSession;
     }
 
     public synchronized void putData(String roomgateId, RelayProtocol obj) {
-        MsgRelayProxyClient<RelayProtocol> client = roomgateSession.get(roomgateId);
+        RelayMsgProxy<RelayProtocol> client = roomgateSession.get(roomgateId);
         if (client != null) {
             client.getRelayMsgQueue().offer(obj);
         }
@@ -58,8 +62,8 @@ public class RelayManager {
         if (roomgateSession.get(roomgateId) != null) {
             throw new MainStageException(ROOMGATE_RELAY_CHANNEL_EXIST);
         }
-        MsgRelayProxyClient<RelayProtocol> c = new MsgRelayProxyClient<RelayProtocol>();
-        c.config(new RelayDecoder(roomgateId), new RelayEncoder(roomgateId), new RelayEventHandler(roomgateId));
+        RelayMsgProxy<RelayProtocol> c = new RelayMsgProxy<RelayProtocol>();
+        c.config(new RelayMsgDecoder(roomgateId), new RelayMsgEncoder(roomgateId), new RelayEventHandler(roomgateId));
         try {
             c.connect(ip, port);
             c.relay();
@@ -83,7 +87,7 @@ public class RelayManager {
         }
     }
 
-    public MsgRelayProxyClient getRelayClientByRoomgateId(String roomgateId) {
+    public RelayMsgProxy getRelayClientByRoomgateId(String roomgateId) {
         return roomgateSession.get(roomgateId);
     }
 }

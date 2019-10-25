@@ -1,8 +1,9 @@
-package com.spirit.community.roomgate.relay;
+package com.spirit.community.roomgate.relay.biz;
 
 
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
+import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
 import com.spirit.tba.Exception.TbaException;
@@ -16,11 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TBase;
 
 @Slf4j
-public class RelayEncoder extends MessageToByteEncoder<Object> {
+public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 
 	private String roomGateId;
 
-	public RelayEncoder(String serverId) {
+	public RelayMsgEncoder(String serverId) {
 		this.roomGateId = serverId;
 	}
 
