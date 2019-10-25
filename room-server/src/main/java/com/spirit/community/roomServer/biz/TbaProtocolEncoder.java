@@ -26,7 +26,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 			if (ev.getEncryptType() == 0) {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 
 				SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
 				Session session = factory.getSessionById(ctx.channel().id().asLongText());
@@ -36,17 +36,17 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 
 				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 6);
 
-				byteBuff.WriteI32(encrypt.length() + 4);
-				byteBuff.WriteI16((short)1);
-				byteBuff.copy(encrypt.getBytes());
-				byte [] o = byteBuff.GetBytes();
+				byteBuff.writeI32(encrypt.length() + 4);
+				byteBuff.writeI16((short)1);
+				byteBuff.append(encrypt.getBytes());
+				byte [] o = byteBuff.toBytes();
 				log.info("encrypt out buff len: {}", o.length);
 				out.writeBytes(o, 0, o.length);
 			}
 			else {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 				log.info("out buff len: {}", buf.length);
 				out.writeBytes(buf, 0, buf.length);
 			}

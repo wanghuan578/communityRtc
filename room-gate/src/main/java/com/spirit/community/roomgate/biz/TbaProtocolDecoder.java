@@ -109,8 +109,8 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             }
             else {
                 msg = new TsRpcByteBuffer(msg_len);
-                msg.WriteI32(msg_len);
-                msg.WriteI16(flag);
+                msg.writeI32(msg_len);
+                msg.writeI16(flag);
                 for (int i = 0; i < msg_len - 6; i++) {
                     msg.WriteByte(in.readByte());
                 }

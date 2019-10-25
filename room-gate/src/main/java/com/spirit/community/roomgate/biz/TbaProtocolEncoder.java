@@ -37,7 +37,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 			if (ev.getEncryptType() == EncryptType.WHOLE) {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 
 				SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
 				Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -46,10 +46,10 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 				String encrypt = TbaAes.encode(new String(buf, "ISO8859-1"), key);
 
 				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + TsMagic.MAGIC_OFFSET);
-				byteBuff.WriteI32(encrypt.length() + TsMagic.MAGIC_OFFSET);
-				byteBuff.WriteI16(EncryptType.WHOLE);
-				byteBuff.copy(encrypt.getBytes());
-				byte [] o = byteBuff.GetBytes();
+				byteBuff.writeI32(encrypt.length() + TsMagic.MAGIC_OFFSET);
+				byteBuff.writeI16(EncryptType.WHOLE);
+				byteBuff.append(encrypt.getBytes());
+				byte [] o = byteBuff.toBytes();
 				out.writeBytes(o, 0, o.length);
 			}
 			else if (ev.getEncryptType() == EncryptType.BODY) {
@@ -58,8 +58,8 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(len);
 					TbaHeadUtil.build(byteBuff, proxy.getHead(), len);
-					byteBuff.copy(proxy.getData());
-					byte [] o = byteBuff.GetBytes();
+					byteBuff.append(proxy.getData());
+					byte [] o = byteBuff.toBytes();
 					out.writeBytes(o, 0, o.length);
 				}
 				else if (ev.getHead().GetType() == RpcEventType.ROOMGATE_CHAT_RELAY) {
@@ -68,8 +68,8 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					int len = proxy.getData().length + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
 					TbaHeadUtil.build(protocol, proxy.getHead(), len);
-					protocol.copy(proxy.getData());
-					byte [] o = protocol.GetBytes();
+					protocol.append(proxy.getData());
+					byte [] o = protocol.toBytes();
 					log.info("encrypt msg len: " + o.length);
 					out.writeBytes(o, 0, o.length);
 				}
@@ -84,8 +84,8 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 					int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
 					TbaHeadUtil.build(protocol, head, len);
-					protocol.copy(encrypt.getBytes());
-					byte [] o = protocol.GetBytes();
+					protocol.append(encrypt.getBytes());
+					byte [] o = protocol.toBytes();
 					log.info("encrypt msg len: " + o.length);
 					out.writeBytes(o, 0, o.length);
 				}
@@ -93,7 +93,7 @@ public class TbaProtocolEncoder extends MessageToByteEncoder<Object> {
 			else {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 				out.writeBytes(buf, 0, buf.length);
 			}
 		}

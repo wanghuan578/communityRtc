@@ -42,7 +42,7 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 			if (ev.getEncryptType() == EncryptType.WHOLE) {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 
 				SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
 				Session session = factory.getSessionByChannelId(ctx.channel().id().asLongText());
@@ -52,10 +52,10 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 
 				TsRpcByteBuffer byteBuff = new TsRpcByteBuffer(encrypt.length() + 6);
 
-				byteBuff.WriteI32(encrypt.length() + 4);
-				byteBuff.WriteI16((short)1);
-				byteBuff.copy(encrypt.getBytes());
-				byte [] o = byteBuff.GetBytes();
+				byteBuff.writeI32(encrypt.length() + 4);
+				byteBuff.writeI16((short)1);
+				byteBuff.append(encrypt.getBytes());
+				byte [] o = byteBuff.toBytes();
 				log.info("encrypt out buff len: {}", o.length);
 				out.writeBytes(o, 0, o.length);
 			}
@@ -71,8 +71,8 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 					TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
 					proxy.getHead().SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
 					TbaHeadUtil.build(protocol, proxy.getHead(), len);
-					protocol.copy(proxy.getData());
-					byte [] o = protocol.GetBytes();
+					protocol.append(proxy.getData());
+					byte [] o = protocol.toBytes();
 					log.info("encrypt msg len: " + o.length);
 					out.writeBytes(o, 0, o.length);
 				}
@@ -87,8 +87,8 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 						int len = encrypt.length() + TbaHeadUtil.HEAD_SIZE;
 						TsRpcByteBuffer protocol = new TsRpcByteBuffer(len);
 						TbaHeadUtil.build(protocol, head, len);
-						protocol.copy(encrypt.getBytes());
-						byte [] o = protocol.GetBytes();
+						protocol.append(encrypt.getBytes());
+						byte [] o = protocol.toBytes();
 						log.info("encrypt msg len: " + o.length);
 						out.writeBytes(o, 0, o.length);
 					} catch (TbaException e) {
@@ -100,7 +100,7 @@ public class RelayMsgEncoder extends MessageToByteEncoder<Object> {
 			else {
 				TsRpcHead head = ev.getHead();
 				TsRpcProtocolFactory protocol = new TsRpcProtocolFactory<TBase>((TBase)ev.getBody(), head, ev.getLength());
-				byte[] buf = protocol.Encode().OutStream().GetBytes();
+				byte[] buf = protocol.Encode().OutStream().toBytes();
 				log.info("out buff len: {}", buf.length);
 				out.writeBytes(buf, 0, buf.length);
 			}

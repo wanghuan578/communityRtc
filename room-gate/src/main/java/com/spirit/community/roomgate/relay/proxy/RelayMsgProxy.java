@@ -26,25 +26,25 @@ public class RelayMsgProxy<T extends Protocol> {
     private ByteToMessageDecoder decoder = null;
     private MessageToByteEncoder<Object> encoder = null;
     private SimpleChannelInboundHandler eventHandler = null;
-    private final BlockingQueue<T> relayMsgQueue;
+    private final BlockingQueue<T> bQueue;
     private volatile boolean running;
     private boolean auth;
-    private Object lock = new Object();
+    private Object ready = new Object();
 
     public RelayMsgProxy() {
-        relayMsgQueue = new LinkedBlockingQueue<T>(65535);
+        bQueue = new LinkedBlockingQueue<T>(65535);
         running = true;
         auth = false;
     }
 
     public Queue<T> getRelayMsgQueue() {
-        return relayMsgQueue;
+        return bQueue;
     }
 
     public void setAuth(boolean auth) {
         this.auth = auth;
-        synchronized (lock) {
-            lock.notify();
+        synchronized (ready) {
+            ready.notify();
         }
     }
 
@@ -53,11 +53,11 @@ public class RelayMsgProxy<T extends Protocol> {
             @Override
             public void run() {
                 while (running) {
-                    synchronized (lock) {
+                    synchronized (ready) {
                         if (!auth) {
                             try {
-                                lock.wait();
-                                log.info("roomgate relay connect successfully!");
+                                ready.wait();
+                                log.info("roomgate relay proxy ready!");
                             } catch (InterruptedException e) {
                                 log.error(e.getLocalizedMessage(), e);
                             }
@@ -65,11 +65,11 @@ public class RelayMsgProxy<T extends Protocol> {
                     }
 
                     try {
-                        T proxy = relayMsgQueue.take();
+                        T elem = bQueue.take();
                         log.info("relay msg send...");
                         TsRpcHead head = new TsRpcHead();
                         head.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                        channel.writeAndFlush(new TbaEvent(head, proxy, 512, EncryptType.BODY));
+                        channel.writeAndFlush(new TbaEvent(head, elem, 512, EncryptType.BODY));
                     } catch (InterruptedException e) {
                         log.error(e.getLocalizedMessage(), e);
                     }
@@ -122,7 +122,7 @@ public class RelayMsgProxy<T extends Protocol> {
     }
 
     public void putRelayEvent(T ev) {
-        relayMsgQueue.offer(ev);
+        bQueue.offer(ev);
     }
 
 
