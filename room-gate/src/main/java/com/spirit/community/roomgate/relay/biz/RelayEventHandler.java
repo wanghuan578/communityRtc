@@ -17,10 +17,10 @@ import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
-import com.spirit.tba.core.EncryptType;
+import com.spirit.tba.core.TbaEncryptType;
 import com.spirit.tba.core.TbaEvent;
-import com.spirit.tba.core.TsRpcHead;
-import com.spirit.tba.tools.TbaToolsKit;
+import com.spirit.tba.core.TbaRpcHead;
+import com.spirit.tba.tools.TbaSerializeUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -75,11 +75,11 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             checksum.roomgate_id = roomGateInfoService.getRoomGateInfo().getRoomGateId();
 
             RoomgateConnectReq req = new RoomgateConnectReq();
-            byte[] data = new TbaToolsKit<RoomgateConnectChecksum>().serialize(checksum, 512);
+            byte[] data = new TbaSerializeUtils<RoomgateConnectChecksum>().serialize(checksum, 512);
             req.checksum = new String(data, "ISO8859-1");
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_REQ);
-            ctx.write(new TbaEvent(head, req, 512, EncryptType.BODY));
+            TbaRpcHead head = new TbaRpcHead(RpcEventType.ROOMGATE_CONNECT_REQ);
+            ctx.write(new TbaEvent(head, req, 512, TbaEncryptType.BODY));
             ctx.flush();
 
 
@@ -101,7 +101,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             RoomGateInfoService roomGateInfoService = ApplicationContextUtils.getBean(RoomGateInfoService.class);
 
             RelayProtocol proxy = (RelayProtocol) o;
-            TsRpcHead header = proxy.getHead();
+            TbaRpcHead header = proxy.getHead();
 
             long srcUid = header.getAttachId1() | header.getAttachId2() << 32;
             long destUid = header.getAttachId3() | header.getAttachId4() << 32;
@@ -117,7 +117,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                     Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
                         header.setType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
-                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, TbaEncryptType.BODY));
                     }
                 } else {
                     RoomGateInfo info = user.getRoomGateInfo();
@@ -129,7 +129,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                         else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             header.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, TbaEncryptType.BODY));
                         } else {
                             relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
                         }

@@ -7,8 +7,8 @@ import com.spirit.community.login.session.Session;
 import com.spirit.community.login.session.SessionFactory;
 import com.spirit.community.protocol.thrift.login.ClientPasswordLoginReq;
 import com.spirit.community.protocol.thrift.login.UserRegisterReq;
-import com.spirit.tba.Exception.TbaException;
 import com.spirit.tba.core.*;
+import com.spirit.tba.tools.TbaAesUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -28,12 +28,12 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
             int msg_len = in.readInt();
             short flag = in.readShort();
 
-            TsRpcByteBuffer msg = null;
+            TbaRpcByteBuffer msg = null;
 
-            if(flag == EncryptType.WHOLE) {
+            if(flag == TbaEncryptType.WHOLE) {
 
-                byte[] encrypt = new byte[msg_len - TsMagic.MAGIC_OFFSET];
-                for (int i = 0; i < msg_len - TsMagic.MAGIC_OFFSET; i++) {
+                byte[] encrypt = new byte[msg_len - TbaMagic.MAGIC_OFFSET];
+                for (int i = 0; i < msg_len - TbaMagic.MAGIC_OFFSET; i++) {
                     encrypt[i] = in.readByte();
                 }
 
@@ -41,12 +41,12 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 Session session = factory.getSessionById(ctx.channel().id().asLongText());
                 String serverRandom = String.valueOf(session.getServerRandom());
                 log.info("decrypt key: {}", serverRandom);
-                String original = TbaAes.decode(new String(encrypt, "utf-8"), serverRandom);
+                String original = TbaAesUtils.decode(new String(encrypt, "utf-8"), serverRandom);
                 byte[] msg00 = original.getBytes("ISO8859-1");
-                msg = new TsRpcByteBuffer(msg00, msg00.length);
+                msg = new TbaRpcByteBuffer(msg00, msg00.length);
             }
             else {
-                msg = new TsRpcByteBuffer(msg_len);
+                msg = new TbaRpcByteBuffer(msg_len);
                 msg.writeI32(msg_len);
                 msg.writeI16(flag);
                 for (int i = 0; i < msg_len - 6; i++) {
@@ -54,22 +54,22 @@ public class TbaProtocolDecoder extends ByteToMessageDecoder {
                 }
             }
 
-            TsRpcEventParser parser = new TsRpcEventParser(msg);
-            TsRpcHead header = parser.Head();
+            TbaRpcEventParser parser = new TbaRpcEventParser(msg);
+            TbaRpcHead header = parser.Head();
 
             log.info("msg receive type: {}", header.getType());
 
             try {
                 if (RpcEventType.MT_CLIENT_PASSWORD_LOGIN_REQ == header.getType()) {
-                    TsRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TsRpcProtocolFactory<ClientPasswordLoginReq>(msg);
+                    TbaRpcProtocolFactory<ClientPasswordLoginReq> protocol = new TbaRpcProtocolFactory<ClientPasswordLoginReq>(msg);
                     out.add(protocol.Decode(ClientPasswordLoginReq.class));
                 }
                 else if (RpcEventType.MT_CLIENT_REGISTER_REQ == header.getType()) {
-                    TsRpcProtocolFactory<UserRegisterReq> protocol = new TsRpcProtocolFactory<UserRegisterReq>(msg);
+                    TbaRpcProtocolFactory<UserRegisterReq> protocol = new TbaRpcProtocolFactory<UserRegisterReq>(msg);
                     out.add(protocol.Decode(UserRegisterReq.class));
                 }
             }
-            catch(TbaException e){
+            catch(com.spirit.tba.exception.TbaException e){
                 log.error(e.getLocalizedMessage(), e);
             }
             catch(InstantiationException e){

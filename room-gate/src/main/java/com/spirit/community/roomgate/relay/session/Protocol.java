@@ -1,9 +1,9 @@
 package com.spirit.community.roomgate.relay.session;
 
-import com.spirit.tba.core.TsRpcHead;
+import com.spirit.tba.core.TbaRpcHead;
 
 public class Protocol {
-    public void setHead(TsRpcHead head) {
+    public void setHead(TbaRpcHead head) {
 
     }
 
@@ -11,7 +11,7 @@ public class Protocol {
 
     }
 
-    public TsRpcHead getHead() {
+    public TbaRpcHead getHead() {
         return null;
     }
 

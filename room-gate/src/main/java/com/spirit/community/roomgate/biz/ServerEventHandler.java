@@ -14,9 +14,9 @@ import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
 import com.spirit.community.roomgate.session.SessionFactory;
-import com.spirit.tba.Exception.TbaException;
+import com.spirit.tba.exception.TbaException;
 import com.spirit.tba.core.*;
-import com.spirit.tba.tools.TbaToolsKit;
+import com.spirit.tba.tools.TbaSerializeUtils;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -58,8 +58,8 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
         notify.setService_id(Integer.valueOf(roomGateInfoService.getRoomGateInfo().getRoomGateId()));
         notify.setError_text("OK");
 
-        TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
-        ctx.write(new TbaEvent(head, notify, 1024, EncryptType.DISABLE));
+        TbaRpcHead head = new TbaRpcHead(RpcEventType.MT_HELLO_NOTIFY);
+        ctx.write(new TbaEvent(head, notify, 1024, TbaEncryptType.DISABLE));
         ctx.flush();
 
         Session session = new Session(ctx, serverRandom);
@@ -83,15 +83,15 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             CommonRes res = new CommonRes();
 
             try {
-                ConnectChecksum checksum = new TbaToolsKit<ConnectChecksum>().deserialize(entity.getChecksum().getBytes("ISO8859-1"), ConnectChecksum.class);
+                ConnectChecksum checksum = new TbaSerializeUtils<ConnectChecksum>().deserialize(entity.getChecksum().getBytes("ISO8859-1"), ConnectChecksum.class);
                 log.info("ConnectChecksum: {}", JSON.toJSONString(checksum, true));
 
                 Session session = sessionFactory.getSessionByChannelId(ctx.channel().id().asLongText());
                 if (session.getServerRandom() != checksum.getServer_random()) {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
-                    TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_REQ);
-                    ctx.write(new TbaEvent(head, res, 256, EncryptType.WHOLE));
+                    TbaRpcHead head = new TbaRpcHead(RpcEventType.CONNECT_REQ);
+                    ctx.write(new TbaEvent(head, res, 256, TbaEncryptType.WHOLE));
                     ctx.flush();
                     return;
                 }
@@ -111,14 +111,14 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 res.error_text = UNEXPECTED_EXCEPTION.text();
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.CONNECT_RES);
-            ctx.write(new TbaEvent(head, res, 256, EncryptType.WHOLE));
+            TbaRpcHead head = new TbaRpcHead(RpcEventType.CONNECT_RES);
+            ctx.write(new TbaEvent(head, res, 256, TbaEncryptType.WHOLE));
             ctx.flush();
         }
         else if (msg instanceof RelayProtocol) {
 
             RelayProtocol proxy = (RelayProtocol) msg;
-            TsRpcHead header = proxy.getHead();
+            TbaRpcHead header = proxy.getHead();
 
             long srcUid = header.getAttachId1() | header.getAttachId2() << 32;
             long destUid = header.getAttachId3() | header.getAttachId4() << 32;
@@ -135,7 +135,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                     Session session = sessionFactory.getSessionByUid(destUid);
                     if (session != null) {
                         header.setType((short) RpcEventType.ROOMGATE_CHAT_NOTIFY);
-                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                        session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, TbaEncryptType.BODY));
                     }
                 }
                 else {
@@ -148,7 +148,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                         else if ((session = sessionFactory.getByRoomgateId(destRoomgateInfo.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             header.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, EncryptType.BODY));
+                            session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, TbaEncryptType.BODY));
                         }
                         else {
                             relayManager.openRoomGate(destRoomgateInfo.getIp(), destRoomgateInfo.getPort(), destRoomgateInfo.getRoomGateId(), proxy);
@@ -168,7 +168,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
             CommonRes res = new CommonRes();
             RoomgateConnectChecksum checksum = null;
             try {
-                checksum = new TbaToolsKit<RoomgateConnectChecksum>().deserialize(entity.checksum.getBytes("ISO8859-1"), RoomgateConnectChecksum.class);
+                checksum = new TbaSerializeUtils<RoomgateConnectChecksum>().deserialize(entity.checksum.getBytes("ISO8859-1"), RoomgateConnectChecksum.class);
                 Session session = sessionFactory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
                 if (session.getServerRandom().longValue() == checksum.server_random) {
                     session.setRoomgateId(checksum.roomgate_id);
@@ -188,8 +188,8 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 res.error_text = ROOMGATE_CONNECT_FAILED.text();
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
-            ctx.write(new TbaEvent(head, res, 256, EncryptType.BODY));
+            TbaRpcHead head = new TbaRpcHead(RpcEventType.ROOMGATE_CONNECT_RES);
+            ctx.write(new TbaEvent(head, res, 256, TbaEncryptType.BODY));
             ctx.flush();
         }
 

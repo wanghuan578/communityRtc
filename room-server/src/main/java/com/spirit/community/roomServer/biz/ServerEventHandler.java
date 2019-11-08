@@ -11,9 +11,9 @@ import com.spirit.community.protocol.thrift.login.*;
 import com.spirit.community.roomServer.service.UserInfoService;
 import com.spirit.community.roomServer.service.dao.entity.UserInfo;
 import com.spirit.community.roomServer.session.SessionFactory;
-import com.spirit.tba.Exception.TbaException;
+import com.spirit.tba.exception.TbaException;
 import com.spirit.tba.core.*;
-import com.spirit.tba.tools.TbaToolsKit;
+import com.spirit.tba.tools.TbaSerializeUtils;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -50,7 +50,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
         notify.setService_id(1000);
         notify.setError_text("OK");
 
-        TsRpcHead head = new TsRpcHead(RpcEventType.MT_HELLO_NOTIFY);
+        TbaRpcHead head = new TbaRpcHead(RpcEventType.MT_HELLO_NOTIFY);
         //ctx.write(new TbaEvent(head, notify, 1024, false));
         ctx.flush();
 
@@ -73,14 +73,14 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
 
             ClientLoginRes res = new ClientLoginRes();
             try {
-                ClientPasswordLoginReqChecksum checksum = new TbaToolsKit<ClientPasswordLoginReqChecksum>().deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
+                ClientPasswordLoginReqChecksum checksum = new TbaSerializeUtils<ClientPasswordLoginReqChecksum>().deserialize(entity.getCheck_sum().getBytes("ISO8859-1"), ClientPasswordLoginReqChecksum.class);
                 log.info("ClientPasswordLoginReqChecksum: {}", JSON.toJSONString(checksum, true));
 
                 Session session = sessionFactory.getSessionById(ctx.channel().id().asLongText());
                 if (session.getServerRandom() != checksum.getServer_random()) {
                     res.error_code = Short.valueOf(SERVER_RANDOM_INVALID.code());
                     res.error_text = SERVER_RANDOM_INVALID.text();
-                    TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
+                    TbaRpcHead head = new TbaRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
                     //ctx.write(new TbaEvent(head, res, 1024, true));
                     ctx.flush();
                     return;
@@ -101,7 +101,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 iceServer.passwd = "spirit";
                 ticket.ice_server = iceServer;
 
-                byte[] sessionTicket = new TbaToolsKit<SessionTicket>().serialize(ticket, 256);
+                byte[] sessionTicket = new TbaSerializeUtils<SessionTicket>().serialize(ticket, 256);
                 res.session_ticket = new String(sessionTicket, "ISO8859-1");
             } catch (IllegalAccessException | InstantiationException | UnsupportedEncodingException | TbaException e) {
                 log.error(e.getLocalizedMessage(), e);
@@ -119,7 +119,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
+            TbaRpcHead head = new TbaRpcHead(RpcEventType.MT_CLIENT_LOGIN_RES);
             //ctx.write(new TbaEvent(head, res, 1024, true));
             ctx.flush();
         }
@@ -155,7 +155,7 @@ public class ServerEventHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            TsRpcHead head = new TsRpcHead(RpcEventType.MT_CLIENT_REGISTER_RES);
+            TbaRpcHead head = new TbaRpcHead(RpcEventType.MT_CLIENT_REGISTER_RES);
             //ctx.write(new TbaEvent(head, res, 1024, false));
             ctx.flush();
         }

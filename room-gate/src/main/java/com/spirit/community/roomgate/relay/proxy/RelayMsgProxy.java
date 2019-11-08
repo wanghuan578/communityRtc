@@ -2,9 +2,9 @@ package com.spirit.community.roomgate.relay.proxy;
 
 import com.spirit.community.common.constant.RpcEventType;
 import com.spirit.community.roomgate.relay.session.Protocol;
-import com.spirit.tba.core.EncryptType;
+import com.spirit.tba.core.TbaEncryptType;
 import com.spirit.tba.core.TbaEvent;
-import com.spirit.tba.core.TsRpcHead;
+import com.spirit.tba.core.TbaRpcHead;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -67,9 +67,9 @@ public class RelayMsgProxy<T extends Protocol> {
                     try {
                         T elem = bQueue.take();
                         log.info("relay msg send...");
-                        TsRpcHead head = new TsRpcHead();
+                        TbaRpcHead head = new TbaRpcHead();
                         head.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
-                        channel.writeAndFlush(new TbaEvent(head, elem, 512, EncryptType.BODY));
+                        channel.writeAndFlush(new TbaEvent(head, elem, 512, TbaEncryptType.BODY));
                     } catch (InterruptedException e) {
                         log.error(e.getLocalizedMessage(), e);
                     }

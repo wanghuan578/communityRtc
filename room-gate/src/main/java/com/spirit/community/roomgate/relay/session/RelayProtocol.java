@@ -1,12 +1,12 @@
 package com.spirit.community.roomgate.relay.session;
 
-import com.spirit.tba.core.TsRpcHead;
+import com.spirit.tba.core.TbaRpcHead;
 
 public class RelayProtocol extends Protocol {
-    private TsRpcHead head;
+    private TbaRpcHead head;
     private byte[] data;
 
-    public void setHead(TsRpcHead head) {
+    public void setHead(TbaRpcHead head) {
         this.head = head;
     }
 
@@ -14,7 +14,7 @@ public class RelayProtocol extends Protocol {
         this.data = data;
     }
 
-    public TsRpcHead getHead() {
+    public TbaRpcHead getHead() {
         return head;
     }
 

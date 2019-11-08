@@ -44,7 +44,7 @@ public class NettyServerConfig {
 
         ServerBootstrap b=new ServerBootstrap();
 
-        b.group(bossGroup,workGroup)
+        b.group(bossGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG,128)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
