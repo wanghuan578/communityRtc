@@ -12,7 +12,7 @@ import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.redis.RedisUtil;
 import com.spirit.community.roomgate.relay.proxy.GateRelayMsgProxy;
-import com.spirit.community.roomgate.relay.session.RelayManager;
+import com.spirit.community.roomgate.relay.session.RoomGateManager;
 import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
 import com.spirit.community.roomgate.session.Session;
@@ -49,8 +49,8 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
         SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
         Session session = factory.removeById(ctx.channel().id().asLongText());
 
-        RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-        relayManager.close(session.getRoomgateId());
+        RoomGateManager gateManager = ApplicationContextUtils.getBean(RoomGateManager.class);
+        gateManager.close(session.getRoomgateId());
     }
 
     @Override
@@ -89,13 +89,12 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
             Session session = factory.getRoomGateSessionByChannelId(ctx.channel().id().asLongText());
 
-            RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
-
-            GateRelayMsgProxy<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
-            c.setAuth(true);
+            RoomGateManager gateManager = ApplicationContextUtils.getBean(RoomGateManager.class);
+            GateRelayMsgProxy<RelayProtocol> gate = gateManager.getRelayClientByRoomgateId(session.getRoomgateId());
+            gate.setAuth(true);
         } else if (o instanceof RelayProtocol) {
 
-            RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
+            RoomGateManager gateManager = ApplicationContextUtils.getBean(RoomGateManager.class);
             SessionFactory sessionFactory = ApplicationContextUtils.getBean(SessionFactory.class);
             RedisUtil redisUtil = ApplicationContextUtils.getBean(RedisUtil.class);
             RoomGateInfoService roomGateInfoService = ApplicationContextUtils.getBean(RoomGateInfoService.class);
@@ -123,15 +122,15 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
                     RoomGateInfo info = user.getRoomGateInfo();
                     Session session = null;
                     try {
-                        if (relayManager.isConnect(info.getRoomGateId())) {
-                            relayManager.putData(info.getRoomGateId(), proxy);
+                        if (gateManager.isConnect(info.getRoomGateId())) {
+                            gateManager.putData(info.getRoomGateId(), proxy);
                         }
                         else if ((session = sessionFactory.getByRoomgateId(info.getRoomGateId())) != null) {
                             //header.SetType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             header.setType((short) RpcEventType.ROOMGATE_CHAT_RELAY);
                             session.getChannel().writeAndFlush(new TbaEvent(header, proxy, 512, TbaEncryptType.BODY));
                         } else {
-                            relayManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
+                            gateManager.openRoomGate(info.getIp(), info.getPort(), info.getRoomGateId(), proxy);
                         }
 
                     } catch (MainStageException e) {

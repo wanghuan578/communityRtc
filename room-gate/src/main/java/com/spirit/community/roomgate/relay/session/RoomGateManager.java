@@ -21,7 +21,7 @@ import static com.spirit.community.common.exception.ExceptionCode.ROOMGATE_RELAY
 
 @Slf4j
 @Component
-public class RelayManager {
+public class RoomGateManager {
 
     @Autowired
     private RoomGateInfoService roomGateInfoService;
@@ -35,7 +35,7 @@ public class RelayManager {
 
     private final Map<String, GateRelayMsgProxy<RelayProtocol>> roomgateSession;
 
-    public RelayManager() {
+    public RoomGateManager() {
         roomgateSession = new ConcurrentHashMap<>();
     }
 
