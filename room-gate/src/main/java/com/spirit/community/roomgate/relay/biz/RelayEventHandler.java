@@ -11,7 +11,7 @@ import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectChecksum;
 import com.spirit.community.protocol.thrift.roomgate.RoomgateConnectReq;
 import com.spirit.community.roomgate.context.ApplicationContextUtils;
 import com.spirit.community.roomgate.redis.RedisUtil;
-import com.spirit.community.roomgate.relay.proxy.RelayMsgProxy;
+import com.spirit.community.roomgate.relay.proxy.GateRelayMsgProxy;
 import com.spirit.community.roomgate.relay.session.RelayManager;
 import com.spirit.community.roomgate.relay.session.RelayProtocol;
 import com.spirit.community.roomgate.service.RoomGateInfoService;
@@ -62,8 +62,8 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
             System.out.println(JSON.toJSONString(notify, true));
 
             SessionFactory factory = ApplicationContextUtils.getBean(SessionFactory.class);
-            Session roomgeteSesion = new Session(ctx, notify.server_random, String.valueOf(notify.service_id));
-            factory.addSession(roomgeteSesion);
+            Session session = new Session(ctx, notify.server_random, String.valueOf(notify.service_id));
+            factory.addSession(session);
 
             long rnd = new Random().nextLong();
             long clientRandom = rnd > 0 ? rnd : rnd * (-1);
@@ -91,7 +91,7 @@ public class RelayEventHandler extends SimpleChannelInboundHandler {
 
             RelayManager relayManager = ApplicationContextUtils.getBean(RelayManager.class);
 
-            RelayMsgProxy<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
+            GateRelayMsgProxy<RelayProtocol> c = relayManager.getRelayClientByRoomgateId(session.getRoomgateId());
             c.setAuth(true);
         } else if (o instanceof RelayProtocol) {
 

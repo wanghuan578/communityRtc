@@ -20,7 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
-public class RelayMsgProxy<T extends Protocol> {
+public class GateRelayMsgProxy<T extends Protocol> {
 
     private Channel channel = null;
     private ByteToMessageDecoder decoder = null;
@@ -31,7 +31,7 @@ public class RelayMsgProxy<T extends Protocol> {
     private boolean auth;
     private Object ready = new Object();
 
-    public RelayMsgProxy() {
+    public GateRelayMsgProxy() {
         bQueue = new LinkedBlockingQueue<T>(65535);
         running = true;
         auth = false;
@@ -48,7 +48,7 @@ public class RelayMsgProxy<T extends Protocol> {
         }
     }
 
-    public void relay() {
+    public void asynLoop() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -121,7 +121,7 @@ public class RelayMsgProxy<T extends Protocol> {
         return channel;
     }
 
-    public void putRelayEvent(T ev) {
+    public void putEvent(T ev) {
         bQueue.offer(ev);
     }
 
