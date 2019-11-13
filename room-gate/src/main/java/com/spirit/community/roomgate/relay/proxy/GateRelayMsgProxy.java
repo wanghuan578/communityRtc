@@ -48,7 +48,7 @@ public class GateRelayMsgProxy<T extends Protocol> {
         }
     }
 
-    public void asynLoop() {
+    public void eventLoop() {
         new Thread(new Runnable() {
             @Override
             public void run() {

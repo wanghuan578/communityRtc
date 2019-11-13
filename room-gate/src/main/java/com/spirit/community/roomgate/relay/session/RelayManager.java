@@ -65,8 +65,8 @@ public class RelayManager {
         GateRelayMsgProxy<RelayProtocol> g = new GateRelayMsgProxy<RelayProtocol>();
         g.config(new RelayMsgDecoder(roomgateId), new RelayMsgEncoder(roomgateId), new RelayEventHandler(roomgateId));
         try {
+            g.eventLoop();
             g.connect(ip, port);
-            g.asynLoop();
             g.putEvent(ev);
             roomgateSession.put(roomgateId, g);
         } catch (Exception e) {
